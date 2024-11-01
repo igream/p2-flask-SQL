@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pagos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Gestión de Pagos</h1>
+        <hr>
+
+        <!-- Tabla de Pagos -->
+        <h2>Lista de Pagos</h2>
+        <div class="row">
+            <div class="col-md-8">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID Pago</th>
+                            <th>ID Cliente</th>
+                            <th>ID Membresía</th>
+                            <th>Fecha de Pago</th>
+                            <th>Monto</th>
+                            <th>Método de Pago</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pago in pagos %}
+                        <tr>
+                            <td>{{ pago.ID_Pago }}</td>
+                            <td>{{ pago.ID_Cliente }}</td>
+                            <td>{{ pago.ID_Membresia }}</td>
+                            <td>{{ pago.Fecha_Pago }}</td>
+                            <td>{{ pago.Monto }}</td>
+                            <td>{{ pago.Metodo_Pago }}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal{{ pago.ID_Pago }}">
+                                    Actualizar
+                                </button>
+                                <form action="/pagos/delete/{{ pago.ID_Pago }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        <!-- Modal para actualizar pago -->
+                        <div class="modal fade" id="editModal{{ pago.ID_Pago }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ pago.ID_Pago }}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editModalLabel{{ pago.ID_Pago }}">Actualizar Pago</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form action="/pagos/update/{{ pago.ID_Pago }}" method="POST">
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label for="id_cliente">ID Cliente:</label>
+                                                <input type="number" class="form-control" id="id_cliente" name="id_cliente" value="{{ pago.ID_Cliente }}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="id_membresia">ID Membresía:</label>
+                                                <input type="number" class="form-control" id="id_membresia" name="id_membresia" value="{{ pago.ID_Membresia }}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="monto">Monto:</label>
+                                                <input type="text" class="form-control" id="monto" name="monto" value="{{ pago.Monto }}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="metodo_pago">Método de Pago:</label>
+                                                <select class="form-control" id="metodo_pago" name="metodo_pago" required>
+                                                    <option value="Efectivo" {% if pago.Metodo_Pago == 'Efectivo' %}selected{% endif %}>Efectivo</option>
+                                                    <option value="Tarjeta de Debito" {% if pago.Metodo_Pago == 'Tarjeta de Debito' %}selected{% endif %}>Tarjeta de Débito</option>
+                                                    <option value="Tarjeta de Credito" {% if pago.Metodo_Pago == 'Tarjeta de Credito' %}selected{% endif %}>Tarjeta de Crédito</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                            <button type="submit" class="btn btn-primary">Actualizar Pago</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Formulario para agregar nuevo Pago -->
+            <div class="col-md-4">
+                <h2>Agregar Nuevo Pago</h2>
+                <form action="/pagos/add" method="POST">
+                    <div class="form-group">
+                        <label for="id_cliente">ID Cliente:</label>
+                        <input type="number" class="form-control" id="id_cliente" name="id_cliente" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_membresia">ID Membresía:</label>
+                        <input type="number" class="form-control" id="id_membresia" name="id_membresia" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="monto">Monto:</label>
+                        <input type="text" class="form-control" id="monto" name="monto" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="metodo_pago">Método de Pago:</label>
+                        <select class="form-control" id="metodo_pago" name="metodo_pago" required>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Tarjeta de Debito">Tarjeta de Débito</option>
+                            <option value="Tarjeta de Credito">Tarjeta de Crédito</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar Pago</button>
+                    <br><br>
+                    <a href="{{ url_for('index') }}" class="btn btn-secondary mb-3">Regresar al Índice</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
