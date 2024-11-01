@@ -1,3 +1,4 @@
+# Formato de conector SQL, requiere driver python-sql
 import mysql.connector
 
 database = mysql.connector.connect(
