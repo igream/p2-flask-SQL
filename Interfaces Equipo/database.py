@@ -1,3 +1,5 @@
+# Archivo de conexion a la base de datos
+
 # Formato de conector SQL, requiere driver python-sql
 import mysql.connector
 
