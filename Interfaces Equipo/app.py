@@ -1,3 +1,5 @@
+# Definición de las rutas a utilizar
+
 # Codigo de funciones
 from flask import Flask, render_template, request, redirect, url_for, flash
 from mysql.connector import connect, Error
