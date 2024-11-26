@@ -24,6 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- <<<<<<< backend
 -- Table structure for table `administradores`
 --
 
@@ -46,6 +47,9 @@ INSERT INTO `administradores` (`ID_Admin`, `User`, `Password`) VALUES
 
 --
 -- Table structure for table `clases`
+--=======
+-- Estructura de la tabla `clases`
+-->>>>>>> Asael
 --
 
 CREATE TABLE `clases` (
@@ -59,7 +63,7 @@ CREATE TABLE `clases` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `clases`
+-- Insertar información a la tabla `clases`
 --
 
 INSERT INTO `clases` (`ID_Clase`, `Nombre_Clase`, `Descripcion`, `Hora`, `Capacidad`, `Imagen`, `ID_Personal`) VALUES
@@ -71,7 +75,7 @@ INSERT INTO `clases` (`ID_Clase`, `Nombre_Clase`, `Descripcion`, `Hora`, `Capaci
 -- --------------------------------------------------------
 
 --
--- Table structure for table `clientes`
+-- Esrtructura de la tabla `clientes`
 --
 
 CREATE TABLE `clientes` (
@@ -88,7 +92,7 @@ CREATE TABLE `clientes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `clientes`
+-- Insertar información a la tabla `clientes`
 --
 
 INSERT INTO `clientes` (`ID_Cliente`, `Nombre`, `Apellido`, `Fecha_Nacimiento`, `Telefono`, `Email`, `password`, `Direccion`, `Fecha_Registro`, `Imagen`) VALUES
