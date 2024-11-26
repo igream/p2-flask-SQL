@@ -8,8 +8,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <script>
+        // Cierra el mensaje flash después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona el contenedor del mensaje flash
+            var flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                // Espera 2 segundos antes de eliminar el mensaje
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';  // Oculta el mensaje flash
+                }, 3500);  // 2000 ms = 2 segundos
+            }
+        });
+    </script>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info text-center">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
     <h1 class="text-center mt-5">Gestión de Clientes - Gimnasio</h1>
     <div class="container mt-4">
+        <p class="text-center text-muted">Nota: No puedes eliminar clientes si este tiene pagos generados</p>
         <div class="card shadow">
             <div class="card-body">
                 <!-- Formulario de registro de cliente -->
@@ -86,46 +110,12 @@
                                 <form action="{{ url_for('delete_cliente', id=cliente.ID_Cliente) }}" method="POST" style="display:inline;">
                                     <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                                 </form>
-                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ cliente.ID_Cliente }}">Editar</button>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
 
-                <!-- Modales de edición -->
-                {% for cliente in clientes %}
-                <div class="modal fade" id="editModal{{ cliente.ID_Cliente }}" tabindex="-1" aria-labelledby="editModalLabel{{ cliente.ID_Cliente }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="editModalLabel{{ cliente.ID_Cliente }}">Editar Cliente</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form action="{{ url_for('edit_cliente', id=cliente.ID_Cliente) }}" method="POST">
-                                <div class="modal-body">
-                                    <label for="nombre_edit_{{ cliente.ID_Cliente }}">Nombre</label>
-                                    <input type="text" id="nombre_edit_{{ cliente.ID_Cliente }}" name="nombre" class="form-control" value="{{ cliente.Nombre }}" required>
-                                    <label for="apellido_edit_{{ cliente.ID_Cliente }}">Apellido</label>
-                                    <input type="text" id="apellido_edit_{{ cliente.ID_Cliente }}" name="apellido" class="form-control" value="{{ cliente.Apellido }}" required>
-                                    <label for="fecha_nacimiento_edit_{{ cliente.ID_Cliente }}">Fecha de Nacimiento</label>
-                                    <input type="date" id="fecha_nacimiento_edit_{{ cliente.ID_Cliente }}" name="fecha_nacimiento" class="form-control" value="{{ cliente.Fecha_Nacimiento }}" required>
-                                    <label for="telefono_edit_{{ cliente.ID_Cliente }}">Teléfono</label>
-                                    <input type="text" id="telefono_edit_{{ cliente.ID_Cliente }}" name="telefono" class="form-control" value="{{ cliente.Telefono }}" required>
-                                    <label for="email_edit_{{ cliente.ID_Cliente }}">Email</label>
-                                    <input type="email" id="email_edit_{{ cliente.ID_Cliente }}" name="email" class="form-control" value="{{ cliente.Email }}" required>
-                                    <label for="direccion_edit_{{ cliente.ID_Cliente }}">Dirección</label>
-                                    <input type="text" id="direccion_edit_{{ cliente.ID_Cliente }}" name="direccion" class="form-control" value="{{ cliente.Direccion }}" required>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
             </div>
         </div>
     </div>

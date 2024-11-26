@@ -10,6 +10,29 @@
     <link rel="stylesheet" href="../static/styles.css">
 </head>
 <body>
+    <script>
+        // Cierra el mensaje flash después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona el contenedor del mensaje flash
+            var flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                // Espera 2 segundos antes de eliminar el mensaje
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';  // Oculta el mensaje flash
+                }, 2000);  // 2000 ms = 2 segundos
+            }
+        });
+    </script>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info text-center">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
     <!-- Encabezado -->
     <header class="bg-dark text-white py-3">
         <div class="container d-flex align-items-center justify-content-between">
@@ -94,7 +117,7 @@
                                             data-id="{{ membresia.ID_Membresia }}"
                                             data-costo="{{ membresia.Costo }}"
                                             data-tipo="{{ membresia.Tipo }}"
-                                        >Pagar</button>
+                                        >Cotizar</button>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -113,7 +136,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="confirmPaymentModalLabel">Confirmar Pago</h5>
+                        <h5 class="modal-title" id="confirmPaymentModalLabel">Generar Pago</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -124,10 +147,11 @@
                                 <label for="metodoPago" class="form-label">Método de Pago</label>
                                 <select class="form-select" name="metodo_pago" id="metodoPago" required>
                                     <option value="Efectivo">Efectivo</option>
-                                    <option value="Electronico">Electrónico</option>
+                                    <option value="Tarjeta de Debito">Tarjeta de Credito</option>
+                                    <option value="Tarjeta de Credito">Tarjeta de Debito</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-success w-100">Confirmar Pago</button>
+                            <button type="submit" class="btn btn-success w-100">Generar Referencia de pago</button>
                         </form>
                     </div>
                 </div>
@@ -146,25 +170,29 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>ID Pago</th>
+                                    <th>Referencia</th>
                                     <th>Membresía</th>
                                     <th>Fecha de Pago</th>
                                     <th>Monto</th>
                                     <th>Metodo de Pago</th>
+                                    <th>Estado de Pago</th>
+                                    <th>Estado de Membresía</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for pago in pagos %}
                                 <tr>
-                                    <td>{{ pago.ID_Pago }}</td>
+                                    <td>{{ pago.Referencia }}</td> 
                                     <td>{{ pago.Tipo }}</td>
                                     <td>{{ pago.Fecha_Pago }}</td>
                                     <td>${{ pago.Monto }}</td>
                                     <td>{{ pago.Metodo_Pago }}</td>
+                                    <td>{{ pago.Estado }}</td>  <!-- Estado de pago -->
+                                    <td>{{ pago.Estado_Membresia }}</td>  <!-- Estado de membresía -->
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="5" class="text-center">No tienes pagos registrados.</td>
+                                    <td colspan="7" class="text-center">No tienes pagos registrados.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -176,54 +204,58 @@
                 </div>
             </div>
         </div>
+        
 
 
-        <!-- Modal para Ver Clases -->
-        <div class="modal fade" id="clasesModal" tabindex="-1" aria-labelledby="clasesModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="clasesModalLabel">Clases Disponibles</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Descripción</th>
-                                    <th>Instructor</th>
-                                    <th>Hora</th>
-                                    <th>Capacidad</th>
-                                    <th>Imagen</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for clase in clases %}
-                                <tr>
-                                    <td>{{ clase.Nombre_Clase }}</td>
-                                    <td>{{ clase.Descripcion }}</td>
-                                    <td>{{ clase.Instructor }}</td>
-                                    <td>{{ clase.Hora }}</td>
-                                    <td>{{ clase.Capacidad }}</td>
-                                    <td>
-                                        {% if clase.Imagen %}
-                                            <img src="{{ url_for('static', filename=clase.Imagen) }}" alt="Imagen de la clase" width="100">
-                                        {% else %}
-                                            No hay imagen
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
+      <!-- Modal para Ver Clases -->
+<div class="modal fade" id="clasesModal" tabindex="-1" aria-labelledby="clasesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clasesModalLabel">Clases Disponibles</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Instructor</th>
+                            <th>Hora</th>
+                            <th>Capacidad</th>
+                            <th>Imagen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for clase in clases %}
+                        <tr>
+                            <td>{{ clase.Nombre_Clase }}</td>
+                            <td>{{ clase.Descripcion }}</td>
+                            <td>{{ clase.Instructor }}</td>
+                            <td>{{ clase.Hora }}</td>
+                            <td>{{ clase.Capacidad }}</td>
+                            <td>
+                                {% if clase.Imagen %}
+                                    <img src="{{ url_for('static', filename=clase.Imagen) }}" alt="Imagen de la clase" width="100">
+                                {% else %}
+                                    No hay imagen
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
+    </div>
+</div>
+
+
+
         <!-- Blog de Gimnasio -->
         <section>
             <h2>Blog del Gimnasio</h2>
@@ -285,20 +317,19 @@
             </div>
         </section>
         
-        
 
         <!-- Membresía activa -->
         <section class="mt-5">
             <h2>Mi Membresía</h2>
-            {% if pago_mas_caro %}
+            {% if membresia_activa %}
                 <div class="card text-center">
                     <div class="card-body">
-                        <h5 class="card-title">{{ pago_mas_caro['Tipo'] }}</h5>
-                        <p class="card-text">Vigencia: {{ pago_mas_caro['Fecha_Inicio'] }} - {{ pago_mas_caro['Fecha_Fin'] }}</p>
-                        <p class="card-text">Costo: ${{ pago_mas_caro['Monto'] }}</p>
+                        <h5 class="card-title">{{ membresia_activa['Tipo'] }}</h5>
+                        <p class="card-text">Vigencia: {{ membresia_activa['Fecha_Pago'] }} - {{ membresia_activa['Fecha_Fin'] }}</p>
+                        <p class="card-text">Costo: ${{ membresia_activa['Monto'] }}</p>
                         
-                        {% if pago_mas_caro['Imagen'] %}
-                            <img src="{{ url_for('static', filename=pago_mas_caro['Imagen']) }}" alt="Imagen de la membresía" class="img-fluid" width="200">
+                        {% if membresia_activa['Imagen'] %}
+                            <img src="{{ url_for('static', filename=membresia_activa['Imagen']) }}" alt="Imagen de la membresía" class="img-fluid" width="200">
                         {% else %}
                             <p>No hay imagen disponible</p>
                         {% endif %}
