@@ -1,5 +1,4 @@
 <!-- Diseño de la tabla "membresias" -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,40 +9,106 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <script>
+        // Cierra el mensaje flash después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona el contenedor del mensaje flash
+            var flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                // Espera 2 segundos antes de eliminar el mensaje
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';  // Oculta el mensaje flash
+                }, 3500);  // 2000 ms = 2 segundos
+            }
+        });
+    </script>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info text-center">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
     <div class="container mt-5">
-        <h1 class="text-center">Gestión de Membresías</h1>
+        <h1 class="text-center">Gestión de Membresías Y Clases Relacionadas</h1>
+        <p class="text-center text-muted">Nota: No puedes eliminar las membresias que tienen pagos registrados.</p>
         <hr>
-
+        <!-- Enlace para regresar al índice -->
+        <div class="mt-3">
+            <a href="/index_admin" class="btn btn-secondary">Volver al Índice</a>
+        </div>
         <!-- Tabla de Membresías -->
         <h2>Lista de Membresías</h2>
         <div class="row">
             <div class="col-md-8">
                 <table class="table table-striped">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tipo</th>
-                            <th>Costo</th>
-                            <th>Duración (días)</th>
-                            <th>Descripción</th>
-                            <th>Acciones</th>
-                        </tr>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Costo</th>
+                                <th>Duración</th>
+                                <th>Descripción</th>
+                                <th>Imagen</th>
+                                <th>Acciones</th>
+                            </tr>
                     </thead>
                     <tbody>
                         {% for membresia in membresias %}
                         <tr>
-                            <td>{{ membresia.ID_Membresia }}</td>
                             <td>{{ membresia.Tipo }}</td>
-                            <td>{{ membresia.Costo }}</td>
-                            <td>{{ membresia.Duracion }}</td>
+                            <td>${{ membresia.Costo }}</td>
+                            <td>{{ membresia.Duracion }} días</td>
                             <td>{{ membresia.Descripcion }}</td>
                             <td>
+                                {% if membresia.Imagen %}
+                                    <img src="{{ url_for('static', filename=membresia.Imagen) }}" alt="Imagen de la membresía" width="100">
+                                {% else %}
+                                    No hay imagen
+                                {% endif %}
+                            </td>
+                            <td>
+                                <!-- Botones de acción -->
                                 <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal{{ membresia.ID_Membresia }}">Editar</button>
                                 <form action="/membresias/delete/{{ membresia.ID_Membresia }}" method="POST" style="display:inline;">
                                     <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                                 </form>
                             </td>
                         </tr>
+                        
+                        <!-- Mostrar clases asociadas -->
+                        <tr>
+                            <td colspan="7">
+                                <h5>Clases asociadas:</h5>
+                                <ul>
+                                    {% for clase in membresia.Clases %}
+                                        <li>
+                                            {{ clase.Nombre_Clase }}
+                                            <!-- Botón para eliminar clase -->
+                                            <form action="/membresias/{{ membresia.ID_Membresia }}/delete_clase/{{ clase.ID_Clase }}" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                            </form>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+
+                                <!-- Formulario para agregar una clase a la membresía -->
+                                <form action="/membresias/{{ membresia.ID_Membresia }}/add_clase" method="POST">
+                                    <div class="form-group">
+                                        <label for="clase_id">Seleccionar Clase:</label>
+                                        <select name="clase_id" id="clase_id" class="form-control">
+                                            {% for clase in clases_disponibles %}
+                                                <option value="{{ clase.ID_Clase }}">{{ clase.Nombre_Clase }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-success btn-sm">Agregar Clase</button>
+                                </form>                                
+                            </td>
+                        </tr>
+
 
                         <!-- Modal para Editar Membresía -->
                         <div class="modal fade" id="editModal{{ membresia.ID_Membresia }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ membresia.ID_Membresia }}" aria-hidden="true">
@@ -55,7 +120,7 @@
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
-                                    <form action="/membresias/edit/{{ membresia.ID_Membresia }}" method="POST">
+                                    <form action="/membresias/update/{{ membresia.ID_Membresia }}" method="POST">
                                         <div class="modal-body">
                                             <div class="form-group">
                                                 <label for="tipo">Tipo de Membresía:</label>
@@ -82,6 +147,8 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        
 
                         {% endfor %}
                     </tbody>
@@ -91,32 +158,33 @@
             <div class="col-md-4">
                 <!-- Agregue un boton al formulario para agregar una nueva Membresía -->
                 <h2>Agregar Nueva Membresía</h2>
-                <form action="/membresias/add" method="POST">
+                <form action="/membresias/add" method="POST" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="tipo">Tipo de Membresía:</label>
                         <input type="text" class="form-control" id="tipo" name="tipo" required>
                     </div>
                     <div class="form-group">
                         <label for="costo">Costo:</label>
-                        <input type="number" class="form-control" id="costo" name="costo" required>
+                        <input type="text" class="form-control" id="costo" name="costo" required>
                     </div>
                     <div class="form-group">
-                        <label for="duracion">Duración (días):</label>
-                        <input type="number" class="form-control" id="duracion" name="duracion" required>
+                        <label for="duracion">Duración:</label>
+                        <input type="text" class="form-control" id="duracion" name="duracion" required>
                     </div>
                     <div class="form-group">
                         <label for="descripcion">Descripción:</label>
                         <input type="text" class="form-control" id="descripcion" name="descripcion" required>
                     </div>
+                    <div class="form-group">
+                        <label for="imagen">Imagen:</label>
+                        <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*">
+                    </div>
                     <button type="submit" class="btn btn-primary">Agregar Membresía</button>
-                </form>
+                </form>                
             </div>
         </div>
 
-        <!-- Enlace para regresar al índice -->
-        <div class="mt-3">
-            <a href="/" class="btn btn-secondary">Volver al Índice</a>
-        </div>
+
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

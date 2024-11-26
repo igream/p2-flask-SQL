@@ -8,6 +8,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <script>
+        // Cierra el mensaje flash después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona el contenedor del mensaje flash
+            var flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                // Espera 2 segundos antes de eliminar el mensaje
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';  // Oculta el mensaje flash
+                }, 3500);  // 2000 ms = 2 segundos
+            }
+        });
+    </script>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info text-center">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
     <h1 class="text-center mt-5">Gestión de Clientes - Gimnasio</h1>
     <div class="container mt-4">
         <p class="text-center text-muted">Nota: No puedes eliminar clientes si este tiene pagos generados</p>
