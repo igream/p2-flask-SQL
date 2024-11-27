@@ -1,5 +1,12 @@
+#<<<<<<< backend
 import os
 from flask import Flask, render_template, request, redirect, flash, url_for, session, send_file
+=======
+# Definición de las rutas a utilizar
+
+# Codigo de funciones
+from flask import Flask, render_template, request, redirect, url_for, flash
+# >>>>>>> Asael
 from mysql.connector import connect, Error
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename 
