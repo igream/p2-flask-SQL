@@ -1,4 +1,3 @@
-<!-- Diseño de la pagina principal -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,23 +8,46 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> 
 </head>
 <body>
+    <script>
+        // Cierra el mensaje flash después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona el contenedor del mensaje flash
+            var flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                // Espera 2 segundos antes de eliminar el mensaje
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';  // Oculta el mensaje flash
+                }, 3500);  // 2000 ms = 2 segundos
+            }
+        });
+    </script>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info text-center">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
     <div class="container my-5">
-        <h1 class="text-center">Gestión de Gimnasio</h1>
-        <p class="text-center">Seleccione una tabla para administrar sus datos.</p>
+        <h1 class="text-center">Gestión de Gimnasio Perron</h1>
+        <p class="text-center">Seleccione una sección para administrar sus datos.</p>
         
         <div class="row">
-            <!-- boton al enlace  a la tabla Clientes -->
+            <!-- Enlace a la tabla Clientes -->
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Clientes</h5>
-                        <p class="card-text">Ver y administrar la información de los clientes.</p>
+                        <p class="card-text">Ver y eliminar clientes</p>
                         <a href="{{ url_for('clientes') }}" class="btn btn-primary">Gestionar Clientes</a>
                     </div>
                 </div>
             </div>
 
-            <!-- boton al enlace  a la tabla Clases -->
+            <!-- Enlace a la tabla Clases -->
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -36,12 +58,12 @@
                 </div>
             </div>
 
-            <!-- Boton al enlace de la tabla Membresías -->
+            <!-- Enlace a la tabla Membresías -->
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Membresías</h5>
-                        <p class="card-text">Ver y administrar los tipos de membresías.</p>
+                        <p class="card-text">Ver y administrar relación de clases y membresias</p>
                         <a href="{{ url_for('membresias') }}" class="btn btn-primary">Gestionar Membresías</a>
                     </div>
                 </div>
@@ -54,13 +76,13 @@
                 <div class="card text-center">
                     <div class="card-body">
                         <h5 class="card-title">Pagos</h5>
-                        <p class="card-text">Ver y administrar los registros de pagos.</p>
+                        <p class="card-text">Ver y aceptar pagos de clientes</p>
                         <a href="{{ url_for('pagos') }}" class="btn btn-primary">Gestionar Pagos</a>
                     </div>
                 </div>
             </div>
 
-            <!-- Este boton te redirige a la pagina personal-->
+            <!-- Enlace a la tabla Personal -->
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-body">
@@ -70,9 +92,12 @@
                     </div>
                 </div>
             </div>
+            <div class="mt-5">
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">Salir</a>
+            </div>
         </div>
     </div>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
