@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clases Ofertadas - Gimnasio Perrón</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_class.css') }}">
+</head>
+<body>
+  <!-- Header Section -->
+  <div class="header-section">
+    <h1>Clases Ofertadas</h1>
+    <p class="lead">Descubre nuestras clases y encuentra la que más se adapte a ti</p>
+  </div>
+
+  <!-- Classes Section -->
+  <div class="classes-section container">
+    <div class="row gy-4">
+      <!-- Class 1: Aerobic -->
+      <div class="col-md-6">
+        <div class="class-card">
+          <img src="{{ url_for('static', filename='uploads/aerobic.jpg') }}" alt="Aerobic" style="width: 750px; height: auto;">
+          <div class="class-card-body">
+            <h4 class="class-title">Aerobic</h4>
+            <p>
+              El aeróbic es un ejercicio colectivo ideal para todas las edades y géneros. Mejora tu salud física y mental con esta modalidad divertida y saludable.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Class 2: Aerobox -->
+      <div class="col-md-6">
+        <div class="class-card">
+          <img src="{{ url_for('static', filename='uploads/aerobox.jpg') }}" alt="Aerobox" style="width: 750px; height: auto;">
+          <div class="class-card-body">
+            <h4 class="class-title">Aerobox</h4>
+            <p>
+              Combina la adrenalina con el deporte. Quema calorías y libera estrés con movimientos inspirados en el kickboxing al ritmo de la música.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Class 3: Abdominales -->
+      <div class="col-md-6">
+        <div class="class-card">
+          <img src="{{ url_for('static', filename='uploads/abdominales.jpg') }}" alt="Abdominales" style="width: 750px; height: auto;">
+          <div class="class-card-body">
+            <h4 class="class-title">Abdominales</h4>
+            <p>
+              Fortalece tu abdomen y logra un «sixpack». Aprende técnicas correctas para evitar lesiones y obtener grandes resultados en poco tiempo.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Class 4: Aquagym -->
+      <div class="col-md-6">
+        <div class="class-card">
+          <img src="{{ url_for('static', filename='uploads/aquagym.jpg') }}" alt="Aquagym" style="width: 750px; height: auto;">
+          <div class="class-card-body">
+            <h4 class="class-title">Aquagym</h4>
+            <p>
+              Disfruta del aeróbic en el agua. Mejora tu salud cardiovascular, muscular y articular con esta divertida actividad acuática.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Class 5: BodyAttack -->
+      <div class="col-md-6">
+        <div class="class-card">
+          <img src="{{ url_for('static', filename='uploads/body.jpg') }}" alt="Body" style="width: 750px; height: auto;">
+          <div class="class-card-body">
+            <h4 class="class-title">BodyAttack</h4>
+            <p>
+              Quema muchas calorías con coreografías de alta intensidad. Perfecto para mejorar tu forma física rápidamente, incluso sin experiencia previa.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

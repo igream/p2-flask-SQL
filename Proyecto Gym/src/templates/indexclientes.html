@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal - Cliente</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <script>
+        // Cierra el mensaje flash después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona el contenedor del mensaje flash
+            var flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                // Espera 2 segundos antes de eliminar el mensaje
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';  // Oculta el mensaje flash
+                }, 2000);  // 2000 ms = 2 segundos
+            }
+        });
+    </script>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info text-center">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+    <!-- Encabezado -->
+    <header class="bg-dark text-white py-3">
+        <div class="container d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <img src="{{ url_for('static', filename=session.get('user_image', 'default-user.png')) }}" 
+                     alt="Imagen de perfil" 
+                     class="rounded-circle me-4" 
+                     style="width: 120px; height: 120px; object-fit: cover;">
+                <div>
+                    <h1>Bienvenido, {{ user_name }}</h1> <!-- Aquí se muestra el nombre -->
+                    <p>Tu progreso comienza aquí - NO PAIN NO GAIN 🗣️ </p>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Salir</a>
+        </div>
+    </header>
+    
+    
+    
+
+    <!-- Contenedor principal -->
+    <main class="container my-4">
+        <!-- Banner -->
+        <section class="mb-4">
+            <img src="../static/banner.jpg" class="img-fluid rounded" alt="Banner del gimnasio">
+        </section>
+
+        <!-- Sección de acciones rápidas -->
+        <section class="row text-center mb-4">
+            <div class="col-md-4">
+                <button class="btn btn-primary w-100 py-3" data-bs-toggle="modal" data-bs-target="#clasesModal">Ver Clases</button>
+            </div>     
+            <div class="col-md-4">
+                <button class="btn btn-secondary w-100 py-3" data-bs-toggle="modal" data-bs-target="#membresiasModal">Comprar Membresía</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-success w-100 py-3" data-bs-toggle="modal" data-bs-target="#pagosModal">Historial de Pagos</button>
+            </div>
+        </section>
+        
+
+
+        <!-- Modal para Comprar membresia -->
+        <div class="modal fade" id="membresiasModal" tabindex="-1" aria-labelledby="membresiasModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="membresiasModalLabel">Comprar Membresía</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Duración</th>
+                                    <th>Costo</th>
+                                    <th>Imagen</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for membresia in membresias %}
+                                <tr>
+                                    <td>{{ membresia.Tipo }}</td>
+                                    <td>{{ membresia.Descripcion }}</td>
+                                    <td>{{ membresia.Duracion }} días</td>
+                                    <td>${{ membresia.Costo }}</td>
+                                    <td>
+                                        {% if membresia.Imagen %}
+                                            <img src="{{ url_for('static', filename=membresia.Imagen) }}" alt="Imagen de la membresía" width="100">
+                                        {% else %}
+                                            No hay imagen
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button 
+                                            class="btn btn-primary btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#confirmPaymentModal"
+                                            data-id="{{ membresia.ID_Membresia }}"
+                                            data-costo="{{ membresia.Costo }}"
+                                            data-tipo="{{ membresia.Tipo }}"
+                                        >Cotizar</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal de Confirmación de Pago -->
+        <div class="modal fade" id="confirmPaymentModal" tabindex="-1" aria-labelledby="confirmPaymentModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmPaymentModalLabel">Generar Pago</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>¿Estás seguro de que deseas pagar la membresía <strong id="paymentType"></strong> por <strong id="paymentAmount"></strong>?</p>
+                        <form id="paymentForm" action="{{ url_for('pagar_membresia') }}" method="POST">
+                            <input type="hidden" name="id_membresia" id="paymentMembresiaId">
+                            <div class="mb-3">
+                                <label for="metodoPago" class="form-label">Método de Pago</label>
+                                <select class="form-select" name="metodo_pago" id="metodoPago" required>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Tarjeta de Debito">Tarjeta de Credito</option>
+                                    <option value="Tarjeta de Credito">Tarjeta de Debito</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Generar Referencia de pago</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>        
+
+        <!-- Modal para Historial de Pagos -->
+<!-- Modal para Historial de Pagos -->
+<div class="modal fade" id="pagosModal" tabindex="-1" aria-labelledby="pagosModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pagosModalLabel">Historial de Pagos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Referencia</th>
+                            <th>Membresía</th>
+                            <th>Fecha de Pago</th>
+                            <th>Monto</th>
+                            <th>Método de Pago</th>
+                            <th>Estado de Pago</th>
+                            <th>Estado de Membresía</th>
+                            <th>Descargar Recibo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pago in pagos %}
+                        <tr>
+                            <td>{{ pago.Referencia }}</td>
+                            <td>{{ pago.Tipo }}</td>
+                            <td>{{ pago.Fecha_Pago }}</td>
+                            <td>${{ pago.Monto }}</td>
+                            <td>{{ pago.Metodo_Pago }}</td>
+                            <td>{{ pago.Estado }}</td>
+                            <td>{{ pago.Estado_Membresia }}</td>
+                            <td>
+                                <a href="{{ url_for('descargar_recibo', id_cliente=session['user_id'], referencia=pago.Referencia) }}" class="btn btn-link" title="Descargar Recibo">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">No tienes pagos registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+        
+
+
+<!-- Modal para Ver Clases -->
+<div class="modal fade" id="clasesModal" tabindex="-1" aria-labelledby="clasesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> <!-- Cambiado a modal extra grande -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clasesModalLabel">Clases Disponibles</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive"> <!-- Añadido contenedor responsive -->
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Instructor</th>
+                                <th>Hora</th>
+                                <th>Capacidad</th>
+                                <th>Imagen</th>
+                                <th>Registro</th> <!-- Columna para botones -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for clase in clases %}
+                            <tr>
+                                <td>{{ clase.Nombre_Clase }}</td>
+                                <td>
+                                    <span 
+                                        data-bs-toggle="tooltip" 
+                                        title="{{ clase.Descripcion }}"
+                                        style="max-width: 200px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        {{ clase.Descripcion }}
+                                    </span>
+                                </td>
+                                <td>{{ clase.Instructor }}</td>
+                                <td>{{ clase.Hora }}</td>
+                                <td>
+                                    {{ clase.Inscritos }}/{{ clase.Capacidad }} <!-- Mostrar inscritos/total -->
+                                </td>
+                                <td>
+                                    {% if clase.Imagen %}
+                                        <img src="{{ url_for('static', filename=clase.Imagen) }}" alt="Imagen de la clase" width="100">
+                                    {% else %}
+                                        No hay imagen
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if clase.Inscrito %}
+                                        <form method="POST" action="{{ url_for('salir_clase', id_clase=clase.ID_Clase) }}">
+                                            <button type="submit" class="btn btn-danger">Salir</button>
+                                        </form>
+                                    {% elif clase.Inscritos >= clase.Capacidad %}
+                                        <button class="btn btn-secondary" disabled>Llena</button>
+                                    {% else %}
+                                        <form method="POST" action="{{ url_for('registrarse_clase', id_clase=clase.ID_Clase) }}">
+                                            <button type="submit" class="btn btn-primary">Registrarse</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                                        
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+        <!-- Blog de Gimnasio -->
+        <section>
+            <h2>Blog del Gimnasio</h2>
+            <div class="row">
+                <!-- Artículo 1: Cómo estructurar un entrenamiento de fuerza -->
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <img src="../static/blog/entrenamiento_fuerza.jpg" class="card-img-top" alt="Entrenamiento de fuerza">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>Cómo estructurar un entrenamiento de fuerza</strong></h5>
+                            <p class="card-text">Si deseas ganar fuerza y músculo, es esencial que sepas cómo estructurar un entrenamiento adecuado. A continuación, te presentamos una estructura básica para tu rutina de fuerza:</p>
+                            <ul>
+                                <li><strong>Ejercicios compuestos:</strong> Los ejercicios como sentadillas, press de banca y peso muerto deben ser la base de tu rutina.</li>
+                                <li><strong>Repeticiones y series:</strong> Realiza entre 3-5 series de 6-12 repeticiones con un peso que te desafíe.</li>
+                                <li><strong>Descanso:</strong> Asegúrate de descansar entre 1 y 2 minutos entre cada serie para permitir la recuperación muscular.</li>
+                                <li><strong>Progresión:</strong> Aumenta gradualmente el peso o la dificultad de los ejercicios cada semana para seguir desafiando a tu cuerpo.</li>
+                            </ul>
+                            <p>Recuerda que la clave para mejorar es la consistencia. Si sigues este enfoque, notarás cómo tu fuerza y masa muscular aumentan con el tiempo.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Artículo 2: Comidas pre-entrenamiento para mejorar tu rendimiento -->
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <img src="../static/blog/comida_preentrenamiento.jpg" class="card-img-top" alt="Comida pre-entrenamiento">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>Comidas pre-entrenamiento para mejorar tu rendimiento</strong></h5>
+                            <p class="card-text">Tu rendimiento en el gimnasio está estrechamente relacionado con lo que comes antes de entrenar. Aquí te damos algunas sugerencias de alimentos que te ayudarán a maximizar tu energía:</p>
+                            <ul>
+                                <li><strong>Carbohidratos complejos:</strong> Alimentos como avena, batatas o arroz integral proporcionan energía sostenida durante el entrenamiento.</li>
+                                <li><strong>Proteínas:</strong> El pollo, pavo, o proteína en polvo son ideales para ayudar a la reparación muscular después del entrenamiento.</li>
+                                <li><strong>Grasas saludables:</strong> Los aguacates y frutos secos proporcionan energía duradera sin causar picos de insulina.</li>
+                            </ul>
+                            <p>Consuma estas comidas 30-60 minutos antes de entrenar para asegurarte de tener suficiente energía para un buen rendimiento en el gimnasio.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Artículo 3: Cómo mantenerte motivado en tu rutina -->
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <img src="../static/blog/motivacion.jpg" class="card-img-top" alt="Motivación para entrenar">
+                        <div class="card-body">
+                            <h5 class="card-title"><strong>Cómo mantenerte motivado en tu rutina</strong></h5>
+                            <p class="card-text">La motivación puede fluctuar, pero existen estrategias que te pueden ayudar a mantener el enfoque. Aquí algunos consejos:</p>
+                            <ul>
+                                <li><strong>Establece metas pequeñas:</strong> Los objetivos alcanzables te mantienen motivado y te dan una sensación de logro constante.</li>
+                                <li><strong>Encuentra un compañero de entrenamiento:</strong> Tener alguien con quien entrenar te ayudará a mantener el compromiso.</li>
+                                <li><strong>Varía tus rutinas:</strong> Cambiar tu rutina de ejercicios regularmente mantendrá las cosas interesantes y desafiantes.</li>
+                                <li><strong>Celebra tus logros:</strong> No importa lo pequeños que sean, celebra tus avances para mantenerte motivado.</li>
+                            </ul>
+                            <p>Recuerda que cada día es una oportunidad para mejorar. Mantén tu mentalidad positiva y verás los resultados.</p>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Agregar más artículos aquí si es necesario -->
+            </div>
+        </section>
+        
+
+        <!-- Membresía activa -->
+        <section class="mt-5">
+            <h2>Mi Membresía</h2>
+            {% if membresia_activa %}
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ membresia_activa['Tipo'] }}</h5>
+                        <p class="card-text">Vigencia: {{ membresia_activa['Fecha_Pago'] }} - {{ membresia_activa['Fecha_Fin'] }}</p>
+                        <p class="card-text">Costo: ${{ membresia_activa['Monto'] }}</p>
+                        
+                        {% if membresia_activa['Imagen'] %}
+                            <img src="{{ url_for('static', filename=membresia_activa['Imagen']) }}" alt="Imagen de la membresía" class="img-fluid" width="200">
+                        {% else %}
+                            <p>No hay imagen disponible</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <p>No tienes ninguna membresía activa.</p>
+            {% endif %}
+        </section>
+        
+        
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2024 Gimnasio Perron. <br>Derechos reservados para WikiTeam:  <br>Fernando Azuara Ibarra, Omar Andreí García López, Jenifer Ramírez Ibarra, Oswaldo Plata Navarrete, Jiovani Asael Tapia López</p>
+        <p>Contacto: GIMNASIOPERRON@uaemex.mx</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa los tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+    <script>
+        var confirmPaymentModal = document.getElementById('confirmPaymentModal');
+        confirmPaymentModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var tipo = button.getAttribute('data-tipo');
+            var costo = button.getAttribute('data-costo');
+            var id = button.getAttribute('data-id');
+            
+            var paymentType = document.getElementById('paymentType');
+            var paymentAmount = document.getElementById('paymentAmount');
+            var paymentMembresiaId = document.getElementById('paymentMembresiaId');
+    
+            paymentType.textContent = tipo;
+            paymentAmount.textContent = `$${costo}`;
+            paymentMembresiaId.value = id;
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+    
+</body>
+</html>

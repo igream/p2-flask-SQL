@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gimnasio Perrón - Sobre Nosotros</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles_about.css') }}">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+</head>
+<body>
+  <!-- Header Section -->
+  <div class="header-section">
+    <h1>Sobre Nosotros</h1>
+    <p class="lead">Tu bienestar físico y mental es nuestra prioridad</p>
+  </div>
+
+  <!-- About Section -->
+  <div class="about-section container">
+    <div class="row">
+      <div class="col-md-6">
+        <h2>¿Quiénes Somos?</h2>
+        <p>
+          En <strong>Gimnasio Perrón</strong>, somos el gimnasio líder en México con una presencia sólida en múltiples estados y más de 15 clubes activos. 
+          Descubre nuestras modernas instalaciones y servicios exclusivos diseñados para transformar tu bienestar físico y mental.
+        </p>
+      </div>
+      <div class="col-md-6">
+        <h2>Nuestro Compromiso</h2>
+        <p>
+          Nos especializamos en brindar un entorno de entrenamiento de primer nivel con instalaciones modernas en más de 5 estados de la República Mexicana, 
+          incluyendo Ciudad de México, Estado de México, Querétaro, Aguascalientes, y Baja California. 
+          Con más de 15 clubes, ofrecemos un espacio donde cada persona puede alcanzar sus metas de bienestar.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Services Section -->
+  <div class="container">
+    <h2 class="text-center my-5">Nuestros Servicios</h2>
+    <div class="row gy-4">
+      <!-- Service 1 -->
+      <div class="col-md-4">
+        <div class="service-card">
+          <img src="{{ url_for('static', filename='uploads/Entrenar.jpg') }}" alt="Entrenamiento">
+          <div class="service-card-content">
+            <h4 class="service-title">Entrenamientos Personalizados</h4>
+            <p>Entrenadores certificados a tu disposición para desarrollar programas específicos.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Service 2 -->
+      <div class="col-md-4">
+        <div class="service-card">
+          <img src="{{ url_for('static', filename='uploads/alberca.jpg') }}" alt="Alberca">
+          <div class="service-card-content">
+            <h4 class="service-title">Alberca Semiolímpica</h4>
+            <p>Disfruta de una alberca con tratamiento de bromo en un ambiente saludable.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Service 3 -->
+      <div class="col-md-4">
+        <div class="service-card">
+          <img src="{{ url_for('static', filename='uploads/clase.jpg') }}" alt="Clases">
+          <div class="service-card-content">
+            <h4 class="service-title">Clases Grupales</h4>
+            <p>Ofrecemos clases de yoga, cycling, pilates y muchas más para todos los niveles.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Service 4 -->
+      <div class="col-md-4">
+        <div class="service-card">
+          <img src="{{ url_for('static', filename='uploads/cross.jpg') }}" alt="Cross">
+          <div class="service-card-content">
+            <h4 class="service-title">Cross Training</h4>
+            <p>Entrenamientos funcionales que te llevarán a mejorar tu rendimiento físico.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Service 5 -->
+      <div class="col-md-4">
+        <div class="service-card">
+          <img src="{{ url_for('static', filename='uploads/vestuarios.jpg') }}" alt="Vestuarios">
+          <div class="service-card-content">
+            <h4 class="service-title">Vestidores de Lujo</h4>
+            <p>Disfruta de vestidores equipados con todas las comodidades.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
