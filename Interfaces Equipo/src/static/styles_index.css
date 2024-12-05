@@ -1,0 +1,203 @@
+:root {
+    --primary-color: #1c1d1e;
+    --secondary-color: #172527;
+    --dark-color: #34495e;
+    --light-color: #ecf0f1;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
+}
+
+/* Estilo general para alinear elementos en la navbar */
+.navbar-nav {
+    display: flex; /* Asegura un diseño flexible */
+    align-items: center; /* Centra verticalmente los elementos */
+}
+
+/* Estilo específico para el botón "Acceder" */
+.navbar .btn-acceder {
+    background-color: #ff4500; /* Color del botón */
+    color: #fff; /* Color del texto */
+    padding: 5px 15px; /* Espaciado interno */
+    border-radius: 5px; /* Bordes redondeados */
+    margin-left: 15px; /* Espacio entre el botón y el último enlace */
+    text-decoration: none; /* Quita subrayado */
+    display: flex; /* Asegura la alineación dentro del botón */
+    align-items: center; /* Centra el texto dentro del botón */
+}
+
+.navbar .btn-acceder:hover {
+    background-color: #ff6347; /* Cambio de color al pasar el cursor */
+}
+
+.hero-section {
+    height: 100vh; /* Ocupa toda la altura del viewport */
+    background: url('tu-imagen-de-fondo.jpg') no-repeat center center/cover; /* Fondo opcional */
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6); /* Efecto de superposición */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* Navbar Styling */
+.navbar {
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.navbar-brand h1 {
+    font-size: 1.5rem; /* Tamaño de fuente */
+    color: #fff; /* Texto blanco */
+    margin: 0; /* Elimina márgenes del encabezado */
+    font-family: 'Arial', sans-serif; /* Fuente clara y legible */
+    transition: color 0.3s ease; /* Transición para efectos de hover */
+}
+
+.navbar-brand:hover h1 {
+    color: #f39c12; /* Cambia de color al pasar el mouse */
+}
+
+.nav-link {
+    color: white !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    transform: scale(1.1);
+}
+
+.btn-acceder {
+    background-color: white;
+    color: var(--primary-color) !important;
+    border-radius: 80px;
+    padding: 10px 20px;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(4, 4, 4, 0.6)), 
+    url('/static/uploads/gym.jpg') no-repeat center/cover;
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.hero-section h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.hero-section .btn-primary {
+    background-color: var(--secondary-color);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: transform 0.3s ease;
+}
+
+.hero-section .btn-primary:hover {
+    transform: scale(1.05);
+    background-color: var(--secondary-color);
+}
+
+/* Servicios Section */
+.servicios {
+    background-color: var(--light-color);
+}
+
+.service-card {
+    text-align: center;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+}
+
+.service-icon {
+    font-size: 5rem;
+    margin-bottom: 15px;
+}
+
+/* Testimonios Section */
+.testimonial-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.testimonial-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+}
+
+/* Footer */
+footer {
+    background-color: #1a1a1a;
+    color: #f8f9fa;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: #ffc107;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: #f8f9fa;
+}
+
+footer i {
+    font-size: 2rem;
+    margin: 0 10px;
+    color: #f8f9fa;
+    transition: color 0.3s ease;
+}
+
+footer i:hover {
+    color: #ffc107;
+}
+
+footer {
+    font-size: 30px; /* Tamaño base para el texto del footer */
+    background-color: #1a1a1a;
+    color: #f8f9fa;
+    text-align: center;
+    padding: 2rem;
+}
+
+footer p, footer a, footer i {
+    font-size: inherit; /* Usa el tamaño base del footer */
+    margin: 0.5rem 0;
+    color: #f8f9fa;
+}
+
+footer a:hover {
+    color: #ffc107; /* Cambia el color al pasar el ratón */
+    text-decoration: underline;
+}

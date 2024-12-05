@@ -1,0 +1,81 @@
+:root {
+    --primary-color: #6a11cb;
+    --secondary-color: #2575fc;
+    --bg-color: #f4f5f7;
+    --text-color: #333;
+  }
+  
+  body {
+    background-color: var(--bg-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+  }
+  
+  .header-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 60px 0;
+    text-align: center;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+  }
+  
+  .header-section h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+  
+  .classes-section {
+    padding: 50px 15px;
+  }
+  
+  .classes-section h2 {
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 30px;
+  }
+  
+  .class-card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    background-color: white;
+    margin-bottom: 30px;
+  }
+  
+  .class-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  }
+  
+  .class-card img {
+    max-height: 250px;
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .class-card:hover img {
+    transform: scale(1.1);
+  }
+  
+  .class-card-body {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .class-title {
+    color: var(--primary-color);
+    font-weight: 700;
+    margin-bottom: 15px;
+  }
+  
+  .footer-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 20px;
+    text-align: center;
+  }
+  
