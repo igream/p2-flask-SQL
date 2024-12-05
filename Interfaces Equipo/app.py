@@ -1,17 +1,11 @@
-#<<<<<<< backend
 import os
 from flask import Flask, render_template, request, redirect, flash, url_for, session, send_file
-=======
-# Definición de las rutas a utilizar
-
-# Codigo de funciones
-from flask import Flask, render_template, request, redirect, url_for, flash
-# >>>>>>> Asael
 from mysql.connector import connect, Error
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename 
 from datetime import timedelta
-from fpdf import FPDF 
+from fpdf import FPDF
+from uuid import uuid4
 import hashlib
 import random
 import string
@@ -46,32 +40,60 @@ def get_db_connection():
 
 # Página principal
 @app.route('/')
+
+def index():
+    print("Accediendo a la ruta principal")
+    return render_template('index.html')
+@app.route('/indexlogin')
 def indexlogin():
     print("Accediendo a la ruta principal")
     return render_template('indexlogin.html')
+@app.route('/services')
+def services():
+    return render_template('info.html')
+
+@app.route('/schedules')
+def schedules():
+    return render_template('membresia.html')
+
+@app.route('/trainers')
+def trainers():
+    return render_template('sobre_nosotros.html')
+
+@app.route('/pricing')
+def pricing():
+    return render_template('class.html')
+
+@app.route('/location')
+def location():
+    return render_template('perron.html')
+
+#Pagina para inicio de sesión de administradores
+@app.route('/AdminLogin')
+def admin_login_template():
+    return render_template('adminlogin.html')
 
 
+## FUNCIONES DE SESIÓN ##
+# Función para obtener la conexión a la base de datos
+def get_cursor():
+    db = get_db_connection()
+    return db, db.cursor(dictionary=True)
 
-@app.route('/index_cliente')
-def index_cliente():
-    if 'user_id' not in session:  # Verifica si el usuario está autenticado
-        flash("Por favor, inicia sesión primero.")
-        return redirect(url_for('indexlogin'))
-    
-    user_id = session['user_id']  # ID del usuario de la sesión
-    user_name = session.get('user_name')  # Recupera el nombre desde la sesión
-
+# Función para obtener todas las membresías disponibles
+def obtener_membresias():
+    db, cursor = get_cursor()
     try:
-        db = get_db_connection()
-        cursor = db.cursor(dictionary=True)
-        
-        # Obtener las membresías disponibles
-        cursor.execute("""
-        SELECT * FROM membresias
-        """)
-        membresias = cursor.fetchall()  # Obtener todas las membresías
-        
-        # Obtener la membresía activa del cliente (solo si está activa)
+        cursor.execute("SELECT * FROM membresias")
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        db.close()
+
+# Función para obtener la membresía activa del cliente
+def obtener_membresia_activa(user_id):
+    db, cursor = get_cursor()
+    try:
         cursor.execute("""
         SELECT p.ID_Membresia, m.Tipo, m.Descripcion, m.Duracion, p.Monto, m.Imagen
         FROM pagos p
@@ -79,36 +101,148 @@ def index_cliente():
         WHERE p.ID_Cliente = %s AND p.Estado_Membresia = 'Activo'
         ORDER BY p.Fecha_Pago DESC LIMIT 1
         """, (user_id,))
-        membresia_activa = cursor.fetchone()
+        return cursor.fetchone()
+    finally:
+        cursor.close()
+        db.close()
 
-        # Obtener las clases asociadas a la membresía activa (si existe)
-        clases = []
-        if membresia_activa:
-            id_membresia = membresia_activa['ID_Membresia']
-            cursor.execute("""
-            SELECT c.*
-            FROM clases c
-            JOIN membresias_clases mc ON c.ID_Clase = mc.ID_Clase
-            WHERE mc.ID_Membresia = %s
-            """, (id_membresia,))
-            clases = cursor.fetchall()
+# Función para obtener las clases asociadas a una membresía activa
+def obtener_clases_membresia(id_membresia):
+    db, cursor = get_cursor()
+    try:
+        cursor.execute("""
+        SELECT 
+            c.*,
+            p.Nombre AS Instructor,
+            (SELECT COUNT(*) FROM Inscripciones WHERE ID_Clase = c.ID_Clase) AS Inscritos
+        FROM Clases c
+        JOIN membresias_clases mc ON c.ID_Clase = mc.ID_Clase
+        LEFT JOIN Personal p ON c.ID_Personal = p.ID_Personal
+        WHERE mc.ID_Membresia = %s
+        """, (id_membresia,))
+        return cursor.fetchall()
+    finally:
+        cursor.close()
+        db.close()
 
-        # Obtener pagos del cliente (opcional, si se desea mostrar historial de pagos)
+
+# Función para obtener el historial de pagos de un cliente
+def obtener_pagos_cliente(user_id):
+    db, cursor = get_cursor()
+    try:
         cursor.execute("""
         SELECT p.ID_Pago, p.ID_Membresia, m.Tipo, p.Fecha_Pago, p.Monto, m.Duracion, m.Imagen, p.Metodo_Pago, p.Estado, p.Estado_Membresia, p.Referencia
         FROM pagos p
         JOIN membresias m ON p.ID_Membresia = m.ID_Membresia
         WHERE p.ID_Cliente = %s
         """, (user_id,))
-        pagos = cursor.fetchall()
-
+        return cursor.fetchall()
     finally:
         cursor.close()
         db.close()
 
-    # Pasar las clases, membresías, pagos y la membresía activa al renderizar la plantilla
-    return render_template('indexclientes.html', user_name=user_name, clases=clases, membresias=membresias, pagos=pagos, membresia_activa=membresia_activa)
+@app.route('/registrarse_clase/<int:id_clase>', methods=['POST'])
+def registrarse_clase(id_clase):
+    if 'user_id' not in session:  # Verifica si el usuario está autenticado
+        flash("Por favor, inicia sesión primero.")
+        return redirect(url_for('indexlogin'))
 
+    user_id = session['user_id']
+    
+    db, cursor = get_cursor()
+    try:
+        # Verificar si el cliente ya está inscrito en la clase
+        cursor.execute("SELECT COUNT(*) AS count FROM Inscripciones WHERE ID_Cliente = %s AND ID_Clase = %s", (user_id, id_clase))
+        inscrito = cursor.fetchone()['count'] > 0
+
+        if inscrito:
+            flash("Ya estás registrado en esta clase.", "info")
+            return redirect(url_for('index_cliente'))
+
+        # Verificar capacidad de la clase
+        cursor.execute("SELECT Capacidad, (SELECT COUNT(*) FROM Inscripciones WHERE ID_Clase = %s) AS Inscritos FROM Clases WHERE ID_Clase = %s", (id_clase, id_clase))
+        clase = cursor.fetchone()
+
+        if clase and clase['Inscritos'] < clase['Capacidad']:
+            # Registrar inscripción
+            cursor.execute("INSERT INTO Inscripciones (ID_Clase, ID_Cliente) VALUES (%s, %s)", (id_clase, user_id))
+            db.commit()
+            flash("Te has registrado exitosamente en la clase.", "success")
+        else:
+            flash("Esta clase está llena. No es posible registrarte.", "danger")
+    except Exception as e:
+        db.rollback()
+        flash("Ocurrió un error al intentar registrarte: " + str(e), "danger")
+    finally:
+        cursor.close()
+        db.close()
+
+    return redirect(url_for('index_cliente'))
+
+@app.route('/salir_clase/<int:id_clase>', methods=['POST'])
+def salir_clase(id_clase):
+    if 'user_id' not in session:  # Verifica si el usuario está autenticado
+        flash("Por favor, inicia sesión primero.")
+        return redirect(url_for('indexlogin'))
+
+    user_id = session['user_id']
+
+    db, cursor = get_cursor()
+    try:
+        # Eliminar inscripción de la tabla Inscripciones
+        cursor.execute("DELETE FROM Inscripciones WHERE ID_Cliente = %s AND ID_Clase = %s", (user_id, id_clase))
+        db.commit()
+        flash("Has salido de la clase exitosamente.", "success")
+    except Exception as e:
+        db.rollback()
+        flash("Ocurrió un error al intentar salir de la clase: " + str(e), "danger")
+    finally:
+        cursor.close()
+        db.close()
+
+    return redirect(url_for('index_cliente'))
+
+
+def verificar_inscripcion(id_cliente, id_clase):
+    db, cursor = get_cursor()
+    try:
+        cursor.execute("SELECT COUNT(*) AS count FROM Inscripciones WHERE ID_Cliente = %s AND ID_Clase = %s", (id_cliente, id_clase))
+        return cursor.fetchone()['count'] > 0
+    finally:
+        cursor.close()
+        db.close()
+
+
+# Ruta principal del cliente 
+@app.route('/index_cliente')
+def index_cliente():
+    if 'user_id' not in session:  # Verifica si el usuario está autenticado
+        flash("Por favor, inicia sesión primero.")
+        return redirect(url_for('indexlogin'))
+    
+    user_id = session['user_id']
+    user_name = session.get('user_name')
+    
+    # Llamar funciones segmentadas
+    membresias = obtener_membresias()
+    membresia_activa = obtener_membresia_activa(user_id)
+    clases = []
+    if membresia_activa:
+        clases = obtener_clases_membresia(membresia_activa['ID_Membresia'])
+        for clase in clases:
+            # Verificar si el cliente está inscrito en cada clase
+            clase['Inscrito'] = verificar_inscripcion(user_id, clase['ID_Clase'])
+    pagos = obtener_pagos_cliente(user_id)
+
+    # Renderizar plantilla con datos obtenidos
+    return render_template(
+        'indexclientes.html', 
+        user_name=user_name, 
+        clases=clases, 
+        membresias=membresias, 
+        pagos=pagos, 
+        membresia_activa=membresia_activa
+    )
     
 @app.route('/index_admin')
 def index_admin():
@@ -125,7 +259,7 @@ def register():
     fecha_nacimiento = request.form['fecha_nacimiento']
     telefono = request.form.get('telefono')  # Opcional
     email = request.form['email']
-    password = generate_password_hash(request.form['password'])
+    password = request.form['password']  # No se genera un hash, se guarda la contraseña tal cual
     direccion = request.form.get('direccion')  # Opcional
     imagen = None  # Inicializa la variable para la imagen
 
@@ -135,16 +269,18 @@ def register():
     if 'imagen' in request.files:
         file = request.files['imagen']
         if file and allowed_file(file.filename):  # Valida el archivo
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))  # Guarda el archivo
-            imagen = f'clientes/{filename}'  # Ruta relativa para guardar en la base de datos
+            # Generar un nombre único para la imagen
+            unique_filename = f"{uuid4().hex}{os.path.splitext(file.filename)[1]}"
+            file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+            file.save(file_path)  # Guarda el archivo
+            imagen = f'clientes/{unique_filename}'  # Ruta relativa para guardar en la base de datos
 
     try:
         db = get_db_connection()
         cursor = db.cursor()
 
         # Verifica si el correo ya está registrado
-        cursor.execute("SELECT * FROM clientes WHERE Email = %s", (email,))
+        cursor.execute("SELECT * FROM Clientes WHERE Email = %s", (email,))
         existing_user = cursor.fetchone()
         if existing_user:
             flash("ERROR! Correo ya registrado, intenta con otro diferente.", "error")
@@ -152,7 +288,7 @@ def register():
 
         # Inserta el nuevo cliente si el correo no está registrado
         cursor.execute("""
-            INSERT INTO clientes (Nombre, Apellido, Fecha_Nacimiento, Telefono, Email, Password, Direccion, Imagen)
+            INSERT INTO Clientes (Nombre, Apellido, Fecha_Nacimiento, Telefono, Email, Password, Direccion, Imagen)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (nombre, apellido, fecha_nacimiento, telefono, email, password, direccion, imagen))
         db.commit()
@@ -166,8 +302,6 @@ def register():
     return redirect(url_for('indexlogin'))
 
 
-
-
 @app.route('/logout')
 def logout():
     session.clear()  # Elimina la información del usuario de la sesión
@@ -178,19 +312,19 @@ def logout():
 def logoutadmin():
     session.clear()  # Elimina la información del usuario del admin 
     flash("Sesión de administrador cerrada correctamente")
-    return redirect(url_for('indexlogin'))
+    return redirect(url_for('admin_login_template'))
 
 @app.route('/login', methods=['POST'])
 def login():
     email = request.form['email']
     password = request.form['password']
-    
+
     try:
         db = get_db_connection()
         cursor = db.cursor(dictionary=True)
         cursor.execute("SELECT * FROM Clientes WHERE Email=%s", (email,))
         user = cursor.fetchone()
-        if user and check_password_hash(user['password'], password):
+        if user and user['password'] == password:  # Compara directamente la contraseña (sin hash)
             session['user_id'] = user['ID_Cliente']
             session['user_name'] = user['Nombre']  # Guarda el nombre del cliente
             session['user_image'] = user['Imagen']  # Guarda la imagen del cliente
@@ -204,26 +338,42 @@ def login():
     return redirect(url_for('indexlogin'))
 
 
+# Ruta para el inicio de sesión de administradores
 @app.route('/admin/login', methods=['POST'])
 def admin_login():
+    # Obtiene el usuario y la contraseña desde el formulario enviado
     user = request.form['user']
     password = request.form['password']
 
     try:
+        # Establece la conexión con la base de datos
         db = get_db_connection()
-        cursor = db.cursor(dictionary=True)
+        cursor = db.cursor(dictionary=True)  # Usa un cursor que devuelve filas como diccionarios
+
+        # Consulta para buscar al administrador por su nombre de usuario
         cursor.execute("SELECT * FROM Administradores WHERE User=%s", (user,))
-        admin = cursor.fetchone()
+        admin = cursor.fetchone()  # Obtiene la primera fila del resultado
+
+        # Si se encuentra un administrador y la contraseña es válida
         if admin and check_password_hash(admin['Password'], password):
+            # Guarda el ID del administrador en la sesión para mantener la autenticación
             session['admin_id'] = admin['ID_Admin']
+
+            # Muestra un mensaje de éxito al administrador
             flash("Inicio de sesión exitoso como administrador.")
-            return redirect(url_for('index_admin'))  # Redirige a la vista del administrador
+
+            # Redirige al administrador a su panel principal
+            return redirect(url_for('index_admin'))
         else:
+            # Si las credenciales son incorrectas, muestra un mensaje de error
             flash("Credenciales incorrectas.")
     finally:
+        # Cierra el cursor y la conexión a la base de datos para liberar recursos
         cursor.close()
         db.close()
-    return redirect(url_for('indexlogin'))
+
+    # Si la autenticación falla, redirige al formulario de inicio de sesión de administradores
+    return redirect(url_for('admin_login_template'))
 
 @app.route('/some_protected_route')
 def some_protected_route():
@@ -235,41 +385,41 @@ def some_protected_route():
 
 @app.route('/guardar_clase', methods=['POST'])
 def guardar_clase():
-    if 'imagen' not in request.files:
-        flash('No se ha seleccionado una imagen')
-        return redirect(request.url)
-    
-    imagen = request.files['imagen']
-    if imagen and allowed_file(imagen.filename):
-        filename = secure_filename(imagen.filename)
-        imagen.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        imagen_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    else:
-        imagen_path = None
-    
-    # Guardar la clase en la base de datos, incluyendo la ruta de la imagen
+    UPLOAD_FOLDER = '/home/FerAzuI/gimnasio/src/static/uploads'
+    imagen_path = None
+
+    if 'imagen' in request.files:
+        imagen = request.files['imagen']
+        if imagen and allowed_file(imagen.filename):
+            # Generar un nombre único para la imagen
+            unique_filename = f"{uuid4().hex}{os.path.splitext(imagen.filename)[1]}"
+            file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+            imagen.save(file_path)
+            imagen_path = f'uploads/{unique_filename}'  # Ruta relativa para la base de datos
+
+    # Guardar la clase en la base de datos
     nombre_clase = request.form['nombre_clase']
     descripcion = request.form['descripcion']
-    instructor_id = request.form['instructor_id']  # Obtener ID del instructor
+    instructor_id = request.form['instructor_id']
     hora = request.form['hora']
     capacidad = request.form['capacidad']
-    
+
     try:
         db = get_db_connection()
         cursor = db.cursor()
         cursor.execute("""
-            INSERT INTO clases (Nombre_Clase, Descripcion, ID_Personal, Hora, Capacidad, imagen)
+            INSERT INTO clases (Nombre_Clase, Descripcion, ID_Personal, Hora, Capacidad, Imagen)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (nombre_clase, descripcion, instructor_id, hora, capacidad, imagen_path))
         db.commit()
-        flash("Clase guardada exitosamente.")
+        flash("Clase guardada exitosamente.", "success")
+    except Error as e:
+        flash(f"Error: {e}", "error")
     finally:
         cursor.close()
         db.close()
-    
+
     return redirect(url_for('index_cliente'))
-
-
 
 
 # CRUD para la tabla Clientes
@@ -311,29 +461,43 @@ def add_cliente():
 
 @app.route('/pagos/update/<int:id>', methods=['POST'])
 def update_pago(id):
+    # Recuperar datos del formulario
     id_cliente = request.form['id_cliente']
     id_membresia = request.form['id_membresia']
     monto = request.form['monto']
     metodo_pago = request.form['metodo_pago']
     estado = request.form['estado']
     referencia = request.form['referencia']
-    estado_membresia = request.form['estado_membresia']  # Nuevo campo
+    estado_membresia = request.form['estado_membresia']
 
     db = get_db_connection()
-    cursor = db.cursor()
+    cursor = db.cursor(dictionary=True)
+
+    # Validar existencia de ID_Cliente
+    cursor.execute("SELECT COUNT(*) AS count FROM Clientes WHERE ID_Cliente = %s", (id_cliente,))
+    if cursor.fetchone()['count'] == 0:
+        flash("El cliente seleccionado no existe.", "danger")
+        return redirect(url_for('pagos'))
+
+    # Validar existencia de ID_Membresia
+    cursor.execute("SELECT COUNT(*) AS count FROM Membresias WHERE ID_Membresia = %s", (id_membresia,))
+    if cursor.fetchone()['count'] == 0:
+        flash("La membresía seleccionada no existe.", "danger")
+        return redirect(url_for('pagos'))
+
+    # Ejecutar la actualización
     cursor.execute("""
-        UPDATE pagos 
+        UPDATE Pagos
         SET ID_Cliente=%s, ID_Membresia=%s, Monto=%s, Metodo_Pago=%s, Estado=%s, Referencia=%s, Estado_Membresia=%s 
         WHERE ID_Pago=%s
     """, (id_cliente, id_membresia, monto, metodo_pago, estado, referencia, estado_membresia, id))
     db.commit()
+
     cursor.close()
     db.close()
 
-    flash("Pago actualizado exitosamente.")
+    flash("Pago actualizado exitosamente.", "success")
     return redirect(url_for('pagos'))
-
-
 
 
 @app.route('/personal/update/<int:id>', methods=['POST'])
@@ -492,7 +656,7 @@ def pagar_membresia():
         cursor = db.cursor(dictionary=True)
         
         # Obtener el costo de la membresía
-        cursor.execute("SELECT Costo FROM membresias WHERE ID_Membresia = %s", (id_membresia,))
+        cursor.execute("SELECT Costo FROM Membresias WHERE ID_Membresia = %s", (id_membresia,))
         membresia = cursor.fetchone()
         if not membresia:
             flash("La membresía seleccionada no existe.")
@@ -506,8 +670,8 @@ def pagar_membresia():
 
         # Registrar el pago con estado "Pendiente" y estado de membresía "Inactivo"
         cursor.execute("""
-            INSERT INTO pagos (ID_Cliente, ID_Membresia, Monto, Metodo_Pago, Estado, Referencia, Estado_Membresia) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO Pagos (ID_Cliente, ID_Membresia, Fecha_Pago, Monto, Metodo_Pago, Estado, Referencia, Estado_Membresia) 
+            VALUES (%s, %s, NOW(), %s, %s, %s, %s, %s)
         """, (id_cliente, id_membresia, monto, metodo_pago, 'Pendiente', referencia, 'Inactivo'))
         db.commit()
 
@@ -555,6 +719,37 @@ def generar_recibo_pdf(id_cliente, id_membresia, monto, metodo_pago, referencia)
     pdf.output(pdf_path)
     return pdf_path
 
+@app.route('/descargar_recibo/<int:id_cliente>/<string:referencia>')
+def descargar_recibo(id_cliente, referencia):
+    # Obtener detalles del pago desde la base de datos
+    db, cursor = get_cursor()
+    try:
+        cursor.execute("""
+        SELECT p.ID_Membresia, p.Monto, p.Metodo_Pago, p.Referencia
+        FROM Pagos p
+        WHERE p.Referencia = %s AND p.ID_Cliente = %s
+        """, (referencia, id_cliente))
+        pago = cursor.fetchone()
+
+        if not pago:
+            flash("No se encontró el recibo solicitado.", "danger")
+            return redirect(url_for('index_cliente'))
+
+        # Generar el recibo PDF
+        pdf_path = generar_recibo_pdf(
+            id_cliente=id_cliente,
+            id_membresia=pago['ID_Membresia'],
+            monto=pago['Monto'],
+            metodo_pago=pago['Metodo_Pago'],
+            referencia=pago['Referencia']
+        )
+    finally:
+        cursor.close()
+        db.close()
+
+    # Enviar el archivo PDF al cliente
+    return send_file(pdf_path, as_attachment=True, download_name=f"recibo_{referencia}.pdf")
+
 
 @app.route('/clientes/delete/<int:id>', methods=['POST'])
 def delete_cliente(id):
@@ -562,25 +757,32 @@ def delete_cliente(id):
         db = get_db_connection()
         cursor = db.cursor()
 
-        # Verifica si el cliente existe antes de intentar eliminarlo
-        cursor.execute("SELECT * FROM Clientes WHERE ID_Cliente = %s", (id,))
+        # Verifica si el cliente existe y obtiene la ruta de la imagen
+        cursor.execute("SELECT Imagen FROM Clientes WHERE ID_Cliente = %s", (id,))
         cliente = cursor.fetchone()
 
         if not cliente:
-            flash("El cliente no existe o ya fue eliminado.")
+            flash("El cliente no existe o ya fue eliminado.", "warning")
             return redirect(url_for('clientes'))
 
-        # Intenta eliminar el cliente
+        # Eliminar la imagen del sistema de archivos si existe
+        imagen = cliente[0]  # Accede al primer (y único) elemento de la tupla
+        if imagen:
+            image_path = os.path.join('src/static', imagen)  # Asegúrate de usar la ruta relativa correcta
+            if os.path.exists(image_path):
+                os.remove(image_path)
+
+        # Eliminar el cliente de la base de datos
         cursor.execute("DELETE FROM Clientes WHERE ID_Cliente = %s", (id,))
         db.commit()
-        flash("Cliente eliminado exitosamente.")
+        flash("Cliente eliminado exitosamente.", "success")
     except Error as e:
-        flash(f"Error al eliminar el cliente: {e}")
+        flash(f"Error al eliminar el cliente: {e}", "error")
     finally:
         cursor.close()
         db.close()
-    return redirect(url_for('clientes'))
 
+    return redirect(url_for('clientes'))
 
 
 @app.route('/clases/delete/<int:id>', methods=['POST'])
@@ -588,17 +790,33 @@ def delete_clase(id):
     try:
         db = get_db_connection()
         cursor = db.cursor()
+
+        # Recuperar la ruta de la imagen de la clase
+        cursor.execute("SELECT Imagen FROM Clases WHERE ID_Clase = %s", (id,))
+        clase = cursor.fetchone()
+
+        if not clase:
+            flash("La clase no existe o ya fue eliminada.", "warning")
+            return redirect(url_for('clases'))
+
+        # Eliminar la imagen si existe
+        imagen = clase[0]  # Acceder al primer (y único) elemento de la tupla
+        if imagen:
+            image_path = os.path.join('src/static', imagen)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+
+        # Eliminar la clase de la base de datos
         cursor.execute("DELETE FROM Clases WHERE ID_Clase = %s", (id,))
         db.commit()
-        flash("Clase eliminada exitosamente.")
+        flash("Clase eliminada exitosamente.", "success")
     except Error as e:
-        flash(f"Error: {e}")
+        flash(f"Error al eliminar la clase: {e}", "error")
     finally:
         cursor.close()
         db.close()
+
     return redirect(url_for('clases'))
-
-
 
 # CRUD para la tabla Clases
 @app.route('/clases')
@@ -737,33 +955,33 @@ def delete_clase_from_membresia(membresia_id, clase_id):
 
 @app.route('/membresias/add', methods=['POST'])
 def add_membresia():
+    UPLOAD_FOLDER = '/home/FerAzuI/gimnasio/src/static/uploads'
+    imagen = None
+
+    if 'imagen' in request.files:
+        file = request.files['imagen']
+        if file and allowed_file(file.filename):
+            unique_filename = f"{uuid4().hex}{os.path.splitext(file.filename)[1]}"
+            file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+            file.save(file_path)
+            imagen = f'uploads/{unique_filename}'  # Ruta para guardar en la base de datos
+
     tipo = request.form['tipo']
     costo = request.form['costo']
     duracion = request.form['duracion']
     descripcion = request.form['descripcion']
-    imagen = None
-
-    # Verificar si se subió una imagen
-    if 'imagen' in request.files:
-        file = request.files['imagen']
-        if file and allowed_file(file.filename):
-            # Asegurarse de que el nombre del archivo sea seguro
-            filename = secure_filename(file.filename)
-            # Guardar la imagen en el directorio adecuado
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            imagen = f'uploads/{filename}'  # Ruta para guardar en la base de datos
 
     try:
         db = get_db_connection()
         cursor = db.cursor()
         cursor.execute("""
             INSERT INTO Membresias (Tipo, Costo, Duracion, Descripcion, Imagen) 
-            VALUES (%s, %s, %s, %s, %s)""",
-            (tipo, costo, duracion, descripcion, imagen))
+            VALUES (%s, %s, %s, %s, %s)
+        """, (tipo, costo, duracion, descripcion, imagen))
         db.commit()
-        flash("Membresía agregada exitosamente.")
+        flash("Membresía agregada exitosamente.", "success")
     except Error as e:
-        flash(f"Error: {e}")
+        flash(f"Error: {e}", "error")
     finally:
         cursor.close()
         db.close()
@@ -775,27 +993,93 @@ def delete_membresia(id):
     try:
         db = get_db_connection()
         cursor = db.cursor()
-        cursor.execute("DELETE FROM Membresias WHERE ID_Membresia=%s", (id,))
+
+        # Recuperar la ruta de la imagen de la membresía
+        cursor.execute("SELECT Imagen FROM Membresias WHERE ID_Membresia = %s", (id,))
+        membresia = cursor.fetchone()
+
+        if not membresia:
+            flash("La membresía no existe o ya fue eliminada.", "warning")
+            return redirect(url_for('membresias'))
+
+        # Eliminar la imagen si existe
+        imagen = membresia[0]  # Accede al primer (y único) elemento de la tupla
+        if imagen:
+            image_path = os.path.join('src/static', imagen)
+            if os.path.exists(image_path):
+                os.remove(image_path)
+
+        # Eliminar la membresía de la base de datos
+        cursor.execute("DELETE FROM Membresias WHERE ID_Membresia = %s", (id,))
         db.commit()
-        flash("Membresía eliminada exitosamente.")
+        flash("Membresía eliminada exitosamente.", "success")
     except Error as e:
-        flash(f"Error: {e}")
+        flash(f"Error al eliminar la membresía: {e}", "error")
     finally:
         cursor.close()
         db.close()
+
     return redirect(url_for('membresias'))
 
-
 # Ruta para ver todos los pagos
-@app.route('/pagos')
+@app.route('/pagos', methods=['GET'])
 def pagos():
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Pagos")
+
+    # Recuperar el término de búsqueda de la solicitud
+    query_param = request.args.get('query', '').strip()
+
+    # Base de la consulta SQL
+    base_query = """
+    SELECT 
+        p.ID_Pago,
+        CONCAT(c.Nombre, ' ', c.Apellido) AS Cliente,
+        m.Tipo AS Membresia,
+        m.Costo AS Precio,
+        p.Fecha_Pago,
+        p.Monto,
+        p.Metodo_Pago,
+        p.Estado,
+        p.Referencia,
+        p.Estado_Membresia,
+        p.ID_Cliente,
+        p.ID_Membresia
+    FROM Pagos p
+    JOIN Clientes c ON p.ID_Cliente = c.ID_Cliente
+    JOIN Membresias m ON p.ID_Membresia = m.ID_Membresia
+    """
+
+    # Filtrar si hay un término de búsqueda
+    if query_param:
+        search_query = """
+        WHERE c.Nombre LIKE %s
+        OR c.Apellido LIKE %s
+        OR m.Tipo LIKE %s
+        OR p.Referencia LIKE %s
+        """
+        base_query += search_query
+        search_value = f"%{query_param}%"
+        cursor.execute(base_query, (search_value, search_value, search_value, search_value))
+    else:
+        cursor.execute(base_query)
+
     pagos = cursor.fetchall()
+
+    # Calcular ingresos totales
+    ingresos_query = """
+    SELECT SUM(m.Costo) AS IngresosTotales
+    FROM Pagos p
+    JOIN Membresias m ON p.ID_Membresia = m.ID_Membresia
+    WHERE p.Estado = 'Pagado'
+    """
+    cursor.execute(ingresos_query)
+    ingresos_totales = cursor.fetchone()['IngresosTotales'] or 0  # Manejo de caso nulo
+
     cursor.close()
     db.close()
-    return render_template('pagos.html', pagos=pagos)
+
+    return render_template('pagos.html', pagos=pagos, ingresos_totales=ingresos_totales, query=query_param)
 
 
 
