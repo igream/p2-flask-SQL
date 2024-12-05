@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pagos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona todos los mensajes flash
+            var flashMessages = document.querySelectorAll('.alert');
+    
+            flashMessages.forEach(function(flashMessage) {
+                // Configura el cierre automático después de 4 segundos
+                setTimeout(function() {
+                    if (flashMessage) {
+                        flashMessage.classList.add('fade');
+                        setTimeout(() => {
+                            flashMessage.remove(); // Elimina el elemento del DOM
+                        }, 500); // Espera a que termine la animación de desaparición
+                    }
+                }, 4000);
+            });
+        });
+    </script>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info alert-dismissible fade show text-center" role="alert">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+    {% endwith %}
+    <div class="container mt-5">
+        <h1 class="text-center">Gestión de Pagos</h1>
+        <hr>
+        <div class="mt-3">
+            <a href="{{ url_for('index_admin') }}" class="btn btn-secondary">Volver al Índice</a>
+        </div>
+        <p class="text-center text-muted">El objetivo de esta sección es que el administrador valide el pago de la membresía del cliente, una vez el pago haya sido verificado, también poder administrar el estado de la membresía</p>
+        <!-- Mostrar ingresos totales -->
+        <div class="alert alert-success text-center mt-4">
+            <h4>Ingresos Totales: ${{ ingresos_totales }}</h4>
+        </div>
+        <!-- Tabla de Pagos -->
+        <h2>Lista de Pagos</h2>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="mt-4">
+                    <form action="{{ url_for('pagos') }}" method="GET" class="form-inline justify-content-center">
+                        <input type="text" name="query" class="form-control mr-2" placeholder="Cliente/Referencia/Membresia" value="{{ request.args.get('query', '') }}">
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                        <a href="{{ url_for('pagos') }}" class="btn btn-secondary ml-2">Limpiar</a>
+                    </form>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID Pago</th>
+                            <th>Cliente</th>
+                            <th>Membresía</th>
+                            <th>Precio</th>
+                            <th>Fecha de Pago</th>
+                            <th>Monto</th>
+                            <th>Método de Pago</th>
+                            <th>Estado</th>
+                            <th>Referencia</th>
+                            <th>Estado de Membresía</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pagos %}
+                            {% for pago in pagos %}
+                            <tr>
+                                <td>{{ pago.ID_Pago }}</td>
+                                <td>{{ pago.Cliente }}</td>
+                                <td>{{ pago.Membresia }}</td>
+                                <td>${{ pago.Precio }}</td>
+                                <td>{{ pago.Fecha_Pago }}</td>
+                                <td>{{ pago.Monto }}</td>
+                                <td>{{ pago.Metodo_Pago }}</td>
+                                <td>{{ pago.Estado }}</td>
+                                <td>{{ pago.Referencia }}</td>
+                                <td>{{ pago.Estado_Membresia }}</td>
+                                <td>
+                                    <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal{{ pago.ID_Pago }}">
+                                        Actualizar
+                                    </button>
+                                    <form action="/pagos/delete/{{ pago.ID_Pago }}" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+
+                            <!-- Modal para actualizar pago -->
+                            <div class="modal fade" id="editModal{{ pago.ID_Pago }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ pago.ID_Pago }}" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editModalLabel{{ pago.ID_Pago }}">Actualizar Estado del Pago</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <form action="/pagos/update/{{ pago.ID_Pago }}" method="POST">
+                                            <div class="modal-body">
+                                                <!-- Campo oculto para id_cliente -->
+                                                <input type="hidden" name="id_cliente" value="{{ pago.ID_Cliente }}">
+                                                
+                                                <!-- Campo oculto para id_membresia -->
+                                                <input type="hidden" name="id_membresia" value="{{ pago.ID_Membresia }}">
+                                        
+                                                <div class="form-group">
+                                                    <label for="monto">Monto:</label>
+                                                    <input type="text" class="form-control" id="monto" name="monto" value="{{ pago.Monto }}" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="metodo_pago">Método de Pago:</label>
+                                                    <select class="form-control" id="metodo_pago" name="metodo_pago" required>
+                                                        <option value="Efectivo" {% if pago.Metodo_Pago == 'Efectivo' %}selected{% endif %}>Efectivo</option>
+                                                        <option value="Tarjeta de Debito" {% if pago.Metodo_Pago == 'Tarjeta de Debito' %}selected{% endif %}>Tarjeta de Débito</option>
+                                                        <option value="Tarjeta de Credito" {% if pago.Metodo_Pago == 'Tarjeta de Credito' %}selected{% endif %}>Tarjeta de Crédito</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="estado">Estado:</label>
+                                                    <select class="form-control" id="estado" name="estado" required>
+                                                        <option value="Pendiente" {% if pago.Estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                                        <option value="Pagado" {% if pago.Estado == 'Pagado' %}selected{% endif %}>Pagado</option>
+                                                        <option value="Vencido" {% if pago.Estado == 'Vencido' %}selected{% endif %}>Vencido</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="estado_membresia">Estado de Membresía:</label>
+                                                    <select class="form-control" id="estado_membresia" name="estado_membresia" required>
+                                                        <option value="Inactivo" {% if pago.Estado_Membresia == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+                                                        <option value="Activo" {% if pago.Estado_Membresia == 'Activo' %}selected{% endif %}>Activo</option>
+                                                        <option value="Validado" {% if pago.Estado_Membresia == 'Validado' %}selected{% endif %}>Validado</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Campo para referencia -->
+                                                <div class="form-group">
+                                                    <label for="referencia">Referencia:</label>
+                                                    <input type="text" class="form-control" id="referencia" name="referencia" value="{{ pago.Referencia }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                                                <button type="submit" class="btn btn-primary">Actualizar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="11" class="text-center">No se encontraron pagos</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

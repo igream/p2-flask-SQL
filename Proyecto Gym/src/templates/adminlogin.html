@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión - Administrador</title>
+    <!-- Referencia a Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Referencia al archivo CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='StyleAdminLogin.css') }}">
+</head>
+<body>
+    <script>
+        // Cierra el mensaje flash después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona el contenedor del mensaje flash
+            var flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                // Espera 2 segundos antes de eliminar el mensaje
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';  // Oculta el mensaje flash
+                }, 3500);  // 2000 ms = 2 segundos
+            }
+        });
+    </script>
+    
+    <!-- Permite que salgan los mensajes flash (avisos de que se realizó algo) -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info text-center">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-4 shadow-lg w-100" style="max-width: 400px;">
+            <h3 class="text-center mb-4 text-danger">Inicio de Sesión <br> Administrador</h3>
+            <form action="/admin/login" method="POST">
+                <div class="mb-3">
+                    <label for="adminUser" class="form-label">Usuario</label>
+                    <input type="text" class="form-control" id="adminUser" name="user" placeholder="Ingresa tu usuario" required>
+                </div>
+                <div class="mb-3">
+                    <label for="adminPassword" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="adminPassword" name="password" placeholder="Ingresa tu contraseña" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-danger">Iniciar Sesión</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Referencia a Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

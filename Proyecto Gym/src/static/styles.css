@@ -1,0 +1,46 @@
+body {
+    background-color: #F4F6F7; /* Fondo claro */
+    color: #34495E; /* Texto oscuro */
+    font-family: 'Arial', sans-serif; /* Tipografía */
+    margin: 0; /* Elimina el margen por defecto */
+    padding: 20px; /* Espaciado en todo el cuerpo */
+}
+
+h1, h2 {
+    color: #2980B9; /* Títulos en azul brillante */
+    margin-bottom: 20px; /* Espaciado inferior */
+}
+
+.card {
+    background-color: #ffffff; /* Fondo blanco para tarjetas */
+    border: 1px solid #BDC3C7; /* Borde gris */
+    transition: box-shadow 0.3s, transform 0.2s; /* Transiciones para sombra y transformación */
+    margin-bottom: 20px; /* Espacio entre tarjetas */
+}
+
+.card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Sombra al pasar el ratón */
+    transform: translateY(-2px); /* Levantar ligeramente la tarjeta al pasar el ratón */
+}
+
+.btn-primary {
+    background-color: #D35400; /* Botones en naranja */
+    border: none;
+    padding: 10px 20px; /* Padding para botones */
+    border-radius: 5px; /* Bordes redondeados */
+    font-weight: bold; /* Negrita para el texto */
+}
+
+.btn-primary:hover {
+    background-color: #C0392B; /* Color al pasar el ratón */
+    transform: scale(1.05); /* Aumentar el tamaño ligeramente al pasar el ratón */
+}
+
+.btn-secondary {
+    background-color: #2980B9; /* Botones secundarios en azul */
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #2471A3; /* Color al pasar el ratón para secundarios */
+}

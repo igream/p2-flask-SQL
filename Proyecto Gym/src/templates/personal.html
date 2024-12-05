@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Personal</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">  <!-- Asegúrate de vincular tu hoja de estilos -->
+</head>
+<body>
+    <script>
+        // Cierra el mensaje flash después de 2 segundos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Selecciona el contenedor del mensaje flash
+            var flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                // Espera 2 segundos antes de eliminar el mensaje
+                setTimeout(function() {
+                    flashMessage.style.display = 'none';  // Oculta el mensaje flash
+                }, 3500);  // 2000 ms = 2 segundos
+            }
+        });
+    </script>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="alert alert-info text-center">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+    <div class="container mt-5">
+        <h1 class="text-center">Gestión de Personal</h1>
+        <hr>
+        <p class="text-center text-muted">El personal registrado como "Entrenador" será automáticamente agregado a las opciones de Instructores al agregar o editar una clase</p>
+        <div class="mt-3">
+            <a href="/index_admin" class="btn btn-secondary">Volver al Índice</a>
+        </div>
+        <!-- Tabla de Personal -->
+        <h2>Lista de Personal</h2>
+        <div class="row">
+            <div class="col-md-8">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Puesto</th>
+                            <th>Salario Mensual</th>
+                            <th>Antigüedad</th>
+                            <th>Turno</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for persona in personal %}
+                        <tr>
+                            <td>{{ persona.ID_Personal }}</td>
+                            <td>{{ persona.Nombre }}</td>
+                            <td>{{ persona.Puesto }}</td>
+                            <td>${{ persona.Salario }}</td>
+                            <td>{{ persona.Antiguedad }} meses</td>
+                            <td>{{ persona.Turno }}</td>
+                            <td>
+                                <!-- Botón para abrir el modal de edición -->
+                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal{{ persona.ID_Personal }}">Editar</button>
+                                <!-- Modal de Edición -->
+                                <div class="modal fade" id="editModal{{ persona.ID_Personal }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editModalLabel">Editar Personal</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="/personal/update/{{ persona.ID_Personal }}" method="POST">
+                                                    <div class="form-group">
+                                                        <label for="nombre">Nombre:</label>
+                                                        <input type="text" class="form-control" id="nombre" name="nombre" value="{{ persona.Nombre }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="puesto">Puesto:</label>
+                                                        <select class="form-control" id="puesto" name="puesto" required>
+                                                            <option value="Entrenador" {% if persona.Puesto == 'Entrenador' %}selected{% endif %}>Entrenador</option>
+                                                            <option value="Cajero" {% if persona.Puesto == 'Cajero' %}selected{% endif %}>Cajero</option>
+                                                            <option value="Conserje" {% if persona.Puesto == 'Conserje' %}selected{% endif %}>Conserje</option>
+                                                            <option value="Mantenimiento" {% if persona.Puesto == 'Mantenimiento' %}selected{% endif %}>Mantenimiento</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="salario">Salario:</label>
+                                                        <input type="number" class="form-control" id="salario" name="salario" value="{{ persona.Salario }}" step="0.01" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="antiguedad">Antigüedad en meses:</label>
+                                                        <input type="number" class="form-control" id="antiguedad" name="antiguedad" value="{{ persona.Antiguedad }}" required>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="turno">Turno:</label>
+                                                        <input type="text" class="form-control" id="turno" name="turno" value="{{ persona.Turno }}" required>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary">Actualizar Personal</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="/personal/delete/{{ persona.ID_Personal }}" class="btn btn-danger btn-sm">Eliminar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Formulario para agregar nuevo Personal -->
+            <div class="col-md-4">
+                <h2>Agregar Nuevo Personal</h2>
+                <form action="/personal/add" method="POST" class="card p-4">
+                    <div class="form-group">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="puesto">Puesto:</label>
+                        <select class="form-control" id="puesto" name="puesto" required>
+                            <option value="Entrenador">Entrenador</option>
+                            <option value="Cajero">Cajero</option>
+                            <option value="Conserje">Conserje</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="salario">Salario Mensual:</label>
+                        <input type="number" class="form-control" id="salario" name="salario" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="antiguedad">Antigüedad en meses:</label>
+                        <input type="number" class="form-control" id="antiguedad" name="antiguedad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="turno">Turno:</label>
+                        <input type="text" class="form-control" id="turno" name="turno" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Agregar Personal</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Enlace para regresar al índice -->
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
