@@ -1,0 +1,28 @@
+/* Fondo principal */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Estilo de la tarjeta de inicio de sesión */
+.card {
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+}
+
+/* Títulos */
+h3 {
+    font-weight: bold;
+}
+
+/* Botón principal */
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #bd2130;
+}

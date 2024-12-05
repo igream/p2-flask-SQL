@@ -6,6 +6,7 @@
     <title>Página Principal - Cliente</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="../static/styles.css">
 </head>
@@ -159,93 +160,126 @@
         </div>        
 
         <!-- Modal para Historial de Pagos -->
-        <div class="modal fade" id="pagosModal" tabindex="-1" aria-labelledby="pagosModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="pagosModalLabel">Historial de Pagos</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Referencia</th>
-                                    <th>Membresía</th>
-                                    <th>Fecha de Pago</th>
-                                    <th>Monto</th>
-                                    <th>Metodo de Pago</th>
-                                    <th>Estado de Pago</th>
-                                    <th>Estado de Membresía</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for pago in pagos %}
-                                <tr>
-                                    <td>{{ pago.Referencia }}</td> 
-                                    <td>{{ pago.Tipo }}</td>
-                                    <td>{{ pago.Fecha_Pago }}</td>
-                                    <td>${{ pago.Monto }}</td>
-                                    <td>{{ pago.Metodo_Pago }}</td>
-                                    <td>{{ pago.Estado }}</td>  <!-- Estado de pago -->
-                                    <td>{{ pago.Estado_Membresia }}</td>  <!-- Estado de membresía -->
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="7" class="text-center">No tienes pagos registrados.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-
-
-      <!-- Modal para Ver Clases -->
-<div class="modal fade" id="clasesModal" tabindex="-1" aria-labelledby="clasesModalLabel" aria-hidden="true">
+<!-- Modal para Historial de Pagos -->
+<div class="modal fade" id="pagosModal" tabindex="-1" aria-labelledby="pagosModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="clasesModalLabel">Clases Disponibles</h5>
+                <h5 class="modal-title" id="pagosModalLabel">Historial de Pagos</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th>Descripción</th>
-                            <th>Instructor</th>
-                            <th>Hora</th>
-                            <th>Capacidad</th>
-                            <th>Imagen</th>
+                            <th>Referencia</th>
+                            <th>Membresía</th>
+                            <th>Fecha de Pago</th>
+                            <th>Monto</th>
+                            <th>Método de Pago</th>
+                            <th>Estado de Pago</th>
+                            <th>Estado de Membresía</th>
+                            <th>Descargar Recibo</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for clase in clases %}
+                        {% for pago in pagos %}
                         <tr>
-                            <td>{{ clase.Nombre_Clase }}</td>
-                            <td>{{ clase.Descripcion }}</td>
-                            <td>{{ clase.Instructor }}</td>
-                            <td>{{ clase.Hora }}</td>
-                            <td>{{ clase.Capacidad }}</td>
+                            <td>{{ pago.Referencia }}</td>
+                            <td>{{ pago.Tipo }}</td>
+                            <td>{{ pago.Fecha_Pago }}</td>
+                            <td>${{ pago.Monto }}</td>
+                            <td>{{ pago.Metodo_Pago }}</td>
+                            <td>{{ pago.Estado }}</td>
+                            <td>{{ pago.Estado_Membresia }}</td>
                             <td>
-                                {% if clase.Imagen %}
-                                    <img src="{{ url_for('static', filename=clase.Imagen) }}" alt="Imagen de la clase" width="100">
-                                {% else %}
-                                    No hay imagen
-                                {% endif %}
+                                <a href="{{ url_for('descargar_recibo', id_cliente=session['user_id'], referencia=pago.Referencia) }}" class="btn btn-link" title="Descargar Recibo">
+                                    <i class="bi bi-download"></i>
+                                </a>
                             </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center">No tienes pagos registrados.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+        
+
+
+<!-- Modal para Ver Clases -->
+<div class="modal fade" id="clasesModal" tabindex="-1" aria-labelledby="clasesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> <!-- Cambiado a modal extra grande -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clasesModalLabel">Clases Disponibles</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive"> <!-- Añadido contenedor responsive -->
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Instructor</th>
+                                <th>Hora</th>
+                                <th>Capacidad</th>
+                                <th>Imagen</th>
+                                <th>Registro</th> <!-- Columna para botones -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for clase in clases %}
+                            <tr>
+                                <td>{{ clase.Nombre_Clase }}</td>
+                                <td>
+                                    <span 
+                                        data-bs-toggle="tooltip" 
+                                        title="{{ clase.Descripcion }}"
+                                        style="max-width: 200px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        {{ clase.Descripcion }}
+                                    </span>
+                                </td>
+                                <td>{{ clase.Instructor }}</td>
+                                <td>{{ clase.Hora }}</td>
+                                <td>
+                                    {{ clase.Inscritos }}/{{ clase.Capacidad }} <!-- Mostrar inscritos/total -->
+                                </td>
+                                <td>
+                                    {% if clase.Imagen %}
+                                        <img src="{{ url_for('static', filename=clase.Imagen) }}" alt="Imagen de la clase" width="100">
+                                    {% else %}
+                                        No hay imagen
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if clase.Inscrito %}
+                                        <form method="POST" action="{{ url_for('salir_clase', id_clase=clase.ID_Clase) }}">
+                                            <button type="submit" class="btn btn-danger">Salir</button>
+                                        </form>
+                                    {% elif clase.Inscritos >= clase.Capacidad %}
+                                        <button class="btn btn-secondary" disabled>Llena</button>
+                                    {% else %}
+                                        <form method="POST" action="{{ url_for('registrarse_clase', id_clase=clase.ID_Clase) }}">
+                                            <button type="submit" class="btn btn-primary">Registrarse</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>                                        
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -352,6 +386,15 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializa los tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+    <script>
         var confirmPaymentModal = document.getElementById('confirmPaymentModal');
         confirmPaymentModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
@@ -366,6 +409,14 @@
             paymentType.textContent = tipo;
             paymentAmount.textContent = `$${costo}`;
             paymentMembresiaId.value = id;
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
     </script>
     

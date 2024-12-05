@@ -1,0 +1,148 @@
+/* General */
+body {
+    background-color: #242527; /* Fondo claro para contraste con elementos oscuros */
+    font-family: 'Merriweather', serif; /* Estilo general de fuente */
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+header {
+    position: relative;
+    color: rgb(249, 249, 245);
+}
+
+header h1 {
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+    margin-bottom: 20px;
+}
+
+header p {
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Formulario */
+form {
+    background-color: #ffffff; /* Fondo blanco */
+    border-radius: 15px; /* Bordes redondeados */
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+form .form-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+form .form-control {
+    border-radius: 10px; /* Bordes redondeados */
+    border: 2px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+form .form-control:focus {
+    border-color: #000;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+form button {
+    background-color: #000; /* Botón oscuro */
+    color: #fff;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #444; /* Efecto hover */
+}
+
+/* Modales */
+.modal-header {
+    background-color: #000; /* Fondo oscuro */
+    color: #0a0a0a; /* Texto claro */
+    border-bottom: none;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+/* Footer */
+footer {
+    background-color: #1a1a1a;
+    color: #f8f9fa;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: #ffc107;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: #f8f9fa;
+}
+
+footer i {
+    font-size: 2rem;
+    margin: 0 10px;
+    color: #f8f9fa;
+    transition: color 0.3s ease;
+}
+
+footer i:hover {
+    color: #ffc107;
+}
+
+footer {
+    font-size: 30px; /* Tamaño base para el texto del footer */
+    background-color: #1a1a1a;
+    color: #f8f9fa;
+    text-align: center;
+    padding: 2rem;
+}
+
+footer p, footer a, footer i {
+    font-size: inherit; /* Usa el tamaño base del footer */
+    margin: 0.5rem 0;
+    color: #f8f9fa;
+}
+
+footer a:hover {
+    color: #ffc107; /* Cambia el color al pasar el ratón */
+    text-decoration: underline;
+}
+
+/* Carrusel */
+.carousel video {
+    object-fit: cover;
+    height: 100%;
+}
+
+/* Botón de Registro */
+button[data-bs-toggle="modal"] {
+    background-color: #222; /* Fondo oscuro */
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+button[data-bs-toggle="modal"]:hover {
+    background-color: #444; /* Efecto hover */
+}
+
+/* Mensaje Flash */
+.alert {
+    background-color: #17a2b8; /* Azul claro */
+    color: white;
+    font-size: 1.2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+label {
+    color: #000000; /* Asegúrate de que sea un color visible */
+    font-size: 1rem; /* Tamaño adecuado */
+    display: block; /* Asegúrate de que sean visibles */
+}

@@ -1,0 +1,46 @@
+
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+    }
+    .header-custom {
+        background: linear-gradient(135deg, #3494E6 0%, #2C3E50 100%);
+        color: white;
+        padding: 3rem 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .card-custom {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .card-custom:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+    }
+    .benefits-section {
+        background-color: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .list-group-item {
+        border-left: 4px solid #3494E6;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        padding-left: 15px;
+    }
+    .list-group-item i {
+        margin-right: 10px;
+        color: #3494E6;
+    }
+    .footer-custom {
+        background: linear-gradient(135deg, #2C3E50 0%, #3494E6 100%);
+    }
+    .card-icon {
+        color: #3494E6;
+        margin-bottom: 10px;
+    }
