@@ -1,78 +1,145 @@
-<!-- Diseño de la pagina principal -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Gimnasio</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> 
+    <title>Gimnasio Perrón - Transforma Tu Cuerpo, Transforma Tu Vida</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles_index.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container my-5">
-        <h1 class="text-center">Gestión de Gimnasio</h1>
-        <p class="text-center">Seleccione una tabla para administrar sus datos.</p>
-        
-        <div class="row">
-            <!-- boton al enlace  a la tabla Clientes -->
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Clientes</h5>
-                        <p class="card-text">Ver y administrar la información de los clientes.</p>
-                        <a href="{{ url_for('clientes') }}" class="btn btn-primary">Gestionar Clientes</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- boton al enlace  a la tabla Clases -->
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Clases</h5>
-                        <p class="card-text">Ver y administrar las clases disponibles.</p>
-                        <a href="{{ url_for('clases') }}" class="btn btn-primary">Gestionar Clases</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Boton al enlace de la tabla Membresías -->
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Membresías</h5>
-                        <p class="card-text">Ver y administrar los tipos de membresías.</p>
-                        <a href="{{ url_for('membresias') }}" class="btn btn-primary">Gestionar Membresías</a>
-                    </div>
-                </div>
+    <!-- Navegación -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <h1> Gimnasio Perrón </h1>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('services') }}">¿Qué obtienes?</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('schedules') }}">Membresías</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('trainers') }}">Sobre nosotros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('pricing') }}">Clases</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('location') }}">¿Por qué Gimnasio Perrón?</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('indexlogin') }}" class="btn-acceder">Acceder</a>
+                    </li>
+                </ul>                
             </div>
         </div>
+    </nav>
 
-        <div class="row mt-4">
-            <!-- Enlace a la tabla Pagos -->
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Pagos</h5>
-                        <p class="card-text">Ver y administrar los registros de pagos.</p>
-                        <a href="{{ url_for('pagos') }}" class="btn btn-primary">Gestionar Pagos</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Este boton te redirige a la pagina personal-->
-            <div class="col-md-4">
-                <div class="card text-center">
-                    <div class="card-body">
-                        <h5 class="card-title">Personal</h5>
-                        <p class="card-text">Ver y administrar la información del personal.</p>
-                        <a href="{{ url_for('personal') }}" class="btn btn-primary">Gestionar Personal</a>
-                    </div>
-                </div>
-            </div>
+    <!-- Hero Section -->
+    <section 
+    class="hero-section text-white text-center d-flex align-items-center justify-content-center">
+    <div class="hero-overlay w-100 h-100">
+        <div class="container">
+            <h1>Transforma Tu Cuerpo, Mejora Tu Vida</h1>
+            <h2 class="lead">Únete a la comunidad fitness más motivadora de la ciudad</h2>
         </div>
     </div>
+</section>
+
+
+    <!-- Servicios Destacados -->
+    <section id="servicios" class="servicios py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Nuestros Servicios Exclusivos</h2>
+            <div class="row">
+                <div class="col-md-4 service-card">
+                    <div class="service-icon">🏋️</div>
+                    <h3>Entrenamiento Personalizado</h3>
+                    <p>Planes adaptados a tus objetivos con seguimiento individual</p>
+                </div>
+                <div class="col-md-4 service-card">
+                    <div class="service-icon">🧘</div>
+                    <h3>Clases Grupales</h3>
+                    <p>Variedad de clases para todos los niveles y gustos</p>
+                </div>
+                <div class="col-md-4 service-card">
+                    <div class="service-icon">📊</div>
+                    <h3>Seguimiento de Progreso</h3>
+                    <p>Tecnología de punta para monitorear tu transformación</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonios Mejorados -->
+    <section id="testimonios" class="testimonios bg-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Historias de Transformación</h2>
+            <div class="row">
+                <div class="col-md-4 testimonial-card">
+                    <img src="{{ url_for('static', filename='uploads/carlos.jpeg') }}" alt="Carlos Mendoza" class="testimonial-avatar">
+                    <blockquote>
+                        <p>"Perdí 20 kg y recuperé mi confianza. Gimnasio Perrón me cambió la vida."</p>
+                        <footer>- Carlos Mendoza</footer>
+                    </blockquote>
+                </div>
+                <div class="col-md-4 testimonial-card">
+                    <img src="{{ url_for('static', filename='uploads/ana.png') }}" alt="Ana García" class="testimonial-avatar">
+                    <blockquote>
+                        <p>"Encontré mi comunidad fitness. Los entrenadores son increíbles."</p>
+                        <footer>- Ana García</footer>
+                    </blockquote>
+                </div>
+                <div class="col-md-4 testimonial-card">
+                    <img src="{{ url_for('static', filename='uploads/luis.jpg') }}" alt="Luis Ramírez" class="testimonial-avatar">
+                    <blockquote>
+                        <p>"Las clases de alta intensidad me mantienen motivado cada semana."</p>
+                        <footer>- Luis Ramírez</footer>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Footer -->
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
+        <p>&copy; 2024 Gimnasio Perron. 
+            <br>Derechos reservados para WikiTeam:  <br>Fernando Azuara Ibarra, Omar Andreí García López, Jenifer Ramírez Ibarra, <br>Oswaldo Plata Navarrete, Jiovani Asael Tapia López</p>
+        <div>
+            <a href="#" class="text-white me-3" title="Facebook">
+                <i class="bi bi-facebook" style="font-size: 2.5rem;"></i>
+            </a>
+            <a href="#" class="text-white me-3" title="Twitter">
+                <i class="bi bi-twitter" style="font-size: 2.5rem;"></i>
+            </a>
+            <a href="#" class="text-white me-3" title="Instagram">
+                <i class="bi bi-instagram" style="font-size: 2.5rem;"></i>
+            </a>
+            <a href="#" class="text-white me-3" title="LinkedIn">
+                <i class="bi bi-linkedin" style="font-size: 2.5rem;"></i>
+            </a>
+        </div>
+    
+
+        <p class="mt-3">
+            <a href="#" class="text-white">Sobre nosotros</a> | 
+            <a href="#" class="text-white">Contacto</a>
+        </p>
+    </div>
+</footer>
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
 </body>
 </html>
