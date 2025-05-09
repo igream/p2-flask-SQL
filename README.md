@@ -1,4 +1,4 @@
-# <<<<<<< Asael
+#
 MVC project using Python-Flask
 This project is basic and uses MySQL as database.
 =======
