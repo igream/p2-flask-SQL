@@ -11,4 +11,5 @@ print(f"INSERT INTO Administradores (User, Password) VALUES ('{user}', '{hash_pa
 # Contraseñas actuales
 # user: admin1 password: contrasena1
 
+# Se recomienda crear un ambiente virtual para ello, esto es solo código fuente
 ## Nota: Esta versión no contiene hash para las contraseñas, por lo que no se debe usar hash para registrar administradores por tema de versiones de werkzeug(Requerida 3.0.1) con PythonAnyWhere(2.0.1)
