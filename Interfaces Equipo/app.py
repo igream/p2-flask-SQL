@@ -18,7 +18,9 @@ import string
 ## pip install WTForms
 ## pip install python-dotenv
 
+
 app = Flask(__name__, template_folder='src/templates', static_folder='src/static')
+# Esto es un ejemplo, pero guarda la palabra clave porque no se expone en publico, si es que lo vas a usar
 app.secret_key = 'your_secret_key'
 
 ### imagenes
